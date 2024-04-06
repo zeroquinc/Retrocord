@@ -1,0 +1,6 @@
+colorthief==0.2.1
+discord.py==2.3.2
+loguru==0.7.2
+Pillow==10.3.0
+pytz==2024.1
+Requests==2.31.0
