@@ -19,7 +19,7 @@ def switch_logger():
         if LOG_LEVEL == 'DEBUG':
             log_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <red>{file}</red> | <yellow>{function}</yellow> | <level>{message}</level>"
         logger.add(sys.stdout, level=LOG_LEVEL, colorize=True, format=log_format)
-        logger.add('logs/retroachievements.log', level=LOG_LEVEL, colorize=True, format=log_format)
+        logger.add('logs/retrocord.log', level=LOG_LEVEL, colorize=True, format=log_format)
     else:
         raise ValueError("Invalid log level")
 
