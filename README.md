@@ -22,6 +22,14 @@ Some features:
       <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/d4bb0bda-3bf8-49a7-abfc-4165daea6d36" alt="image2">
     </td>
   </tr>
+  <tr>
+    <td>
+      <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/bdacb06d-4287-4e8d-8637-67b340c97e3f" alt="image3">
+    </td>
+    <td>
+      <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/4018e90a-fbfd-4b3e-a730-9cd31b4892e5" alt="image4">
+    </td>
+  </tr>
 </table>
 
 ## Getting Started
