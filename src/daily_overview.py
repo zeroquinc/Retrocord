@@ -1,10 +1,12 @@
 import discord
 
-from api import UserCompletionByDate, UserProfile
-from utils import get_now_and_yesterday_epoch, get_most_common_color
-from config import DISCORD_IMAGE, RETRO_DAILY_IMAGE
+from services.api import UserCompletionByDate, UserProfile
 
-from custom_logger import logger
+from utils.image_utils import get_most_common_color
+from utils.time_utils import get_now_and_yesterday_epoch
+from config.config import DISCORD_IMAGE, RETRO_DAILY_IMAGE
+
+from utils.custom_logger import logger
 
 async def process_daily_overview(users, api_username, api_key, channel):
     all_embeds = []
@@ -21,10 +23,10 @@ async def process_daily_overview(users, api_username, api_key, channel):
         except Exception as e:
             logger.error(f'Error processing user {user}: {e}')
 
-    logger.info(f"Sending {len(all_embeds)} embeds to {channel}")
-    for i in range(0, len(all_embeds), 10):
-        logger.debug(f"Sending embeds {i} to {i+10}")
-        await channel.send(embeds=all_embeds[i:i+10])
+    if all_embeds:
+        logger.info(f"Sending {len(all_embeds)} embeds to {channel}")
+        for i in range(0, len(all_embeds), 10):
+            await channel.send(embeds=all_embeds[i:i+10])
 
 def count_daily_points(user_completion):
     achievements = user_completion.get_achievements()  # replace get_achievements() with the actual method or attribute

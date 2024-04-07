@@ -14,7 +14,6 @@ class BaseAPI:
     def __init__(self, endpoint, params):
         self.endpoint = endpoint
         self.params = params
-        self.data = self.fetch_data()
 
     def fetch_data(self):
         url = f"{self.BASE_API_URL}{self.endpoint}"
@@ -41,7 +40,7 @@ UserCompletionRecent: Get a user's recent achievements, defaults to 60 minutes
     
 class UserCompletionRecent(BaseAPI):
     def __init__(self, username, api_username, api_key):
-        super().__init__("API_GetUserRecentAchievements.php", {'z': api_username, 'y': api_key, 'u': username, 'm': 15})
+        super().__init__("API_GetUserRecentAchievements.php", {'z': api_username, 'y': api_key, 'u': username, 'm': 2000})
         data = self.fetch_data()
         self.user = username
         self.achievements = [Achievement(item) for item in data]
@@ -65,7 +64,7 @@ class UserCompletionByDate(BaseAPI):
         return self.achievements
     
 """
-UserCompletionProgress: Get a user's completion progress
+UserCompletionProgress: Get a user's completion progress, currently not used because UserProgressGameInfo is used instead and is better
 """
 
 class UserCompletionProgress(BaseAPI):

@@ -1,11 +1,11 @@
 import discord
 from datetime import datetime
 
-from api import UserProgressGameInfo, UserCompletionRecent, UserProfile
-from utils import get_most_common_color
-from config import api_key, api_username
+from services.api import UserProgressGameInfo, UserCompletionRecent, UserProfile
+from utils.image_utils import get_most_common_color
+from config.config import api_key, api_username
 
-from custom_logger import logger
+from utils.custom_logger import logger
 
 async def process_achievements(users, api_username, api_key, channel):
     all_embeds = []
@@ -31,9 +31,16 @@ async def process_achievements(users, api_username, api_key, channel):
         for i in range(0, len(all_embeds), 10):
             await channel.send(embeds=[embed[1] for embed in all_embeds[i:i+10]])
 
-def get_game_details(game_id, username, api_username, api_key):
+def get_game_details(game_id, username, api_username, api_key, game_details_cache):
+    cache_key = (game_id, username, api_username, api_key)
+    if cache_key in game_details_cache:
+        logger.debug(f'Using cached game details for game {game_id}')
+        return game_details_cache[cache_key]
+
     try:
         game = UserProgressGameInfo(game_id, username, api_username, api_key).get_game()
+        logger.debug(f'Fetched game details for game {game_id}')
+        game_details_cache[cache_key] = game
         return game
     except Exception as e:
         logger.error(f'Error getting game details for game {game_id}: {e}')
@@ -44,16 +51,17 @@ def get_achievements(user_completion):
         game_ids = set()
         game_details = {}
         game_achievements = {}
+        game_details_cache = {}
 
         for achievement in achievements:
             game_ids.add(achievement.game_id)
-            print(f"{user_completion.user} has earned an achievement: {achievement.title} - Game: {achievement.game_title}")
+            logger.info(f"{user_completion.user} has earned an achievement: {achievement.title} ({achievement.points}) ({achievement.retropoints}) for {achievement.game_title}")
             if achievement.game_id not in game_achievements:
                 game_achievements[achievement.game_id] = []
             game_achievements[achievement.game_id].append(achievement)
 
         for game_id in game_ids:
-            game = get_game_details(game_id, user_completion.user, api_username, api_key)
+            game = get_game_details(game_id, user_completion.user, api_username, api_key, game_details_cache)
             game_details[game_id] = game
 
         return game_details, game_achievements
