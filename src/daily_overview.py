@@ -18,6 +18,7 @@ async def process_daily_overview(users, api_username, api_key, channel):
             achievement_count, daily_points, daily_retropoints = count_daily_points(user_completion)
             max_achievement = find_max_achievement(user_completion)
             fav_game, fav_game_achievements, fav_url = favorite_game(user_completion)
+            logger.info(f"{user} has earned {achievement_count} achievements today, totaling {daily_points} points and {daily_retropoints} RetroPoints. Their favorite game is {fav_game} with {fav_game_achievements} achievements.")
             embed = create_embed(profile, achievement_count, daily_points, daily_retropoints, max_achievement, fav_game, fav_url)
             all_embeds.append(embed)
         except Exception as e:
@@ -33,11 +34,16 @@ def count_daily_points(user_completion):
     if achievements:  # checks if the sequence is not empty
         achievement_count = len(achievements)
         daily_points = sum(achievement.points for achievement in achievements)
-        daily_retropoints = sum(achievement.retropoints_format for achievement in achievements)
+        daily_retropoints = sum(achievement.retropoints for achievement in achievements)
     else:
         achievement_count = 0
         daily_points = 0
         daily_retropoints = 0
+
+    # Format daily_points and daily_retropoints if they are greater than or equal to 10000
+    daily_points = format(daily_points, ',').replace(',', '.') if daily_points >= 10000 else str(daily_points)
+    daily_retropoints = format(daily_retropoints, ',').replace(',', '.') if daily_retropoints >= 10000 else str(daily_retropoints)
+
     return achievement_count, daily_points, daily_retropoints
 
 def find_max_achievement(user_completion):

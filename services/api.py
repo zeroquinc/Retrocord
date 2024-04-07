@@ -114,7 +114,7 @@ class Profile:
         self.total_points_format = format(self.total_points, ',').replace(',', '.') if self.total_points >= 10000 else self.total_points
         self.total_softcore_points = data.get('TotalSoftcorePoints') or "N/A"
         self.total_true_points = data.get('TotalTruePoints') or "N/A"
-        self.total_true_points_format = format(self.total_true_points, ',').replace(',', '.') if self.total_true_points >= 10000 else self.total_true_points
+        self.total_true_points_format = format(self.total_true_points, ',').replace(',', '.') if self.total_true_points >= 10000 else str(self.total_true_points)
         self.permissions = data.get('Permissions') or "N/A"
         self.untracked = data.get('Untracked') or "N/A"
         self.id = data.get('ID') or "N/A"
@@ -194,7 +194,7 @@ class Achievement:
         self.mode = "Hardcore" if data.get('HardcoreMode', 0) == 1 else "Softcore"
         self.points = data.get('Points') or "N/A"
         self.retropoints = data.get('TrueRatio') or "N/A"
-        self.retropoints_format = format(self.retropoints, ',').replace(',', '.') if self.retropoints >= 10000 else self.retropoints
+        self.retropoints_format = format(self.retropoints, ',').replace(',', '.') if self.retropoints >= 10000 else str(self.retropoints)
         self.title = data.get('Title') or "N/A"
         self.type = data.get('Type') or "N/A"
         self.url = f"{BASE_URL}/achievement/{self.achievement_id}" if self.achievement_id else "N/A"
