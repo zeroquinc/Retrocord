@@ -3,7 +3,7 @@ from datetime import datetime
 
 from services.api import UserProgressGameInfo, UserCompletionRecent, UserProfile
 from utils.image_utils import get_most_common_color
-from config.config import api_key, api_username
+from config.config import api_key, api_username, DISCORD_IMAGE
 
 from utils.custom_logger import logger
 
@@ -77,7 +77,7 @@ def create_embed(game, user, achievement, profile, current, total):
     embed.add_field(name="Achievement", value=f"[{achievement.title}]({achievement.url})", inline=True)
     embed.add_field(name="Points", value=f"{achievement.points} ({achievement.retropoints_format})", inline=True)
     embed.add_field(name="Completion", value=f"{completion}/{game.total_achievements} ({percentage:.2f}%)", inline=True)
-    embed.set_image(url="https://i.postimg.cc/KvSTwcQ0/undefined-Imgur.png")
+    embed.set_image(url=DISCORD_IMAGE)
     embed.set_thumbnail(url=achievement.badge_url)
     embed.set_footer(text=f"{user} • Unlocked on {achievement.date_amsterdam}", icon_url=profile.profile.user_pic)
     embed.set_author(name=f"{achievement.mode} Achievement Unlocked", icon_url=achievement.game_icon)

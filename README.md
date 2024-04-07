@@ -26,9 +26,9 @@ Some features:
 
 ## Getting Started
 
-To get started with the Retrocord Discord Bot, follow these steps:
+To get started with Retrocord, follow these steps:
 
-1. Clone the repository to your local machine
+1. Clone the repository to your local machine or download the latest release
 2. Navigate to the project directory
 3. Install the dependecies with `pip install -r requirements.txt`
 4. Navigate to `/config/`, rename `config_example.py` to `config.py` and fill in the variables
