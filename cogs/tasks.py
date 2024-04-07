@@ -3,7 +3,7 @@ from discord.ext import tasks, commands
 from src.achievements import process_achievements
 from src.daily_overview import process_daily_overview
 from utils.time_utils import delay_until_next_15th_minute, delay_until_next_midnight
-from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID
+from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID, API_INTERVAL
 from utils.custom_logger import logger
 
 class TasksCog(commands.Cog):
@@ -13,7 +13,7 @@ class TasksCog(commands.Cog):
         self.process_achievements.start()  # Start the task when the cog is loaded
         self.process_daily_overview.start()  # Start the task when the cog is loaded
 
-    @tasks.loop(minutes=15)
+    @tasks.loop(minutes=API_INTERVAL)
     async def process_achievements(self):
         channel = self.bot.get_channel(ACHIEVEMENTS_CHANNEL_ID)
         try:
