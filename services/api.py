@@ -2,6 +2,8 @@ import requests
 from datetime import datetime
 import pytz
 
+from config.config import API_INTERVAL
+
 BASE_URL = "https://retroachievements.org"
 
 """
@@ -35,12 +37,12 @@ class GameDetails(BaseAPI):
         return self.game
     
 """
-UserCompletionRecent: Get a user's recent achievements, defaults to 60 minutes
+UserCompletionRecent: Get a user's recent achievements, defaults to 15 minutes
 """
     
 class UserCompletionRecent(BaseAPI):
     def __init__(self, username, api_username, api_key):
-        super().__init__("API_GetUserRecentAchievements.php", {'z': api_username, 'y': api_key, 'u': username, 'm': 2000})
+        super().__init__("API_GetUserRecentAchievements.php", {'z': api_username, 'y': api_key, 'u': username, 'm': API_INTERVAL})
         data = self.fetch_data()
         self.user = username
         self.achievements = [Achievement(item) for item in data]
