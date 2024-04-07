@@ -197,4 +197,4 @@ class Achievement:
         self.retropoints_format = format(self.retropoints, ',').replace(',', '.') if self.retropoints >= 10000 else self.retropoints
         self.title = data.get('Title') or "N/A"
         self.type = data.get('Type') or "N/A"
-        self.url = f"{BASE_URL}achievement/{self.achievement_id}" if self.achievement_id else "N/A"
+        self.url = f"{BASE_URL}/achievement/{self.achievement_id}" if self.achievement_id else "N/A"
