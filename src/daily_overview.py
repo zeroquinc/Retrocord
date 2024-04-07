@@ -91,7 +91,7 @@ def create_embed(profile, achievement_count, daily_points, daily_retropoints, ma
         ).add_field(
             name="Game of the Day", value=f"[{fav_game}]({fav_url})", inline=False
         ).add_field(
-            name="Achievement of the Day", value=f"[{max_achievement.title}]({max_achievement.url}) ({max_achievement.points}) ({max_achievement.retropoints})", inline=False
+            name="Achievement of the Day", value=f"[{max_achievement.title}]({max_achievement.url}) ({max_achievement.points}) ({max_achievement.retropoints_format})", inline=False
         ).add_field(
             name="Points", value=f"{daily_points} ({daily_retropoints})", inline=True
         ).add_field(
