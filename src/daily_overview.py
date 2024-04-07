@@ -33,7 +33,7 @@ def count_daily_points(user_completion):
     if achievements:  # checks if the sequence is not empty
         achievement_count = len(achievements)
         daily_points = sum(achievement.points for achievement in achievements)
-        daily_retropoints = sum(achievement.retropoints for achievement in achievements)
+        daily_retropoints = sum(achievement.retropoints_format for achievement in achievements)
     else:
         achievement_count = 0
         daily_points = 0
