@@ -1,10 +1,8 @@
-import os
 import requests
 from PIL import Image
 from io import BytesIO
 from colorthief import ColorThief
 from collections import Counter
-
 """
 A function to get the most common color in an image. 
 Returns a value that can be used as a color in a Discord Embed.
@@ -13,11 +11,13 @@ Returns a value that can be used as a color in a Discord Embed.
 def get_most_common_color(image_url):
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content))
-    img.save("temp_image.png")  # save image temporarily
-    color_thief = ColorThief("temp_image.png")
 
-    # get color palette
-    palette = color_thief.get_palette(color_count=6)
+    # Convert image object to bytes and get color palette
+    img_byte_arr = BytesIO()
+    img.save(img_byte_arr, format='PNG')
+    img_byte_arr = img_byte_arr.getvalue()
+    color_thief = ColorThief(BytesIO(img_byte_arr))
+    palette = color_thief.get_palette(color_count=6, quality=5)
 
     # count pixels of each color
     pixels = list(img.getdata())
@@ -35,5 +35,4 @@ def get_most_common_color(image_url):
             max_count = count
             most_colorful_color = color
 
-    os.remove("temp_image.png")  # delete the temporary image
     return most_colorful_color[0] * 256 * 256 + most_colorful_color[1] * 256 + most_colorful_color[2]
