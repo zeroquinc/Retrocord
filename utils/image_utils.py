@@ -8,9 +8,17 @@ A function to get the most common color in an image.
 Returns a value that can be used as a color in a Discord Embed.
 """
 
-def get_most_common_color(image_url):
+def get_most_common_color(image_url, border_percentage=0.1):
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content))
+
+    # Crop the image to exclude borders
+    width, height = img.size
+    left = width * border_percentage
+    top = height * border_percentage
+    right = width * (1 - border_percentage)
+    bottom = height * (1 - border_percentage)
+    img = img.crop((left, top, right, bottom))
 
     # Convert image object to bytes and get color palette
     img_byte_arr = BytesIO()
@@ -30,7 +38,7 @@ def get_most_common_color(image_url):
     for color in palette:
         saturation = max(color) - min(color)  # calculate saturation
         count = color_counts[color]
-        if saturation > 50 and count > max_count:  # exclude colors close to black, white, or grey
+        if saturation > 30 and count > max_count:  # lower saturation threshold to include more colors
             max_saturation = saturation
             max_count = count
             most_colorful_color = color
