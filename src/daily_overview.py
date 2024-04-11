@@ -1,5 +1,4 @@
 import discord
-import time
 
 from services.api import UserCompletionByDate, UserProfile
 
@@ -74,8 +73,7 @@ def favorite_game(user_completion):
         return None, None, None  # Return None if the dictionary is empty
     
 def create_embed(profile, achievement_count, daily_points, daily_retropoints, max_achievement, fav_game, fav_url):
-    most_common_color = get_most_common_color(profile.profile.user_pic)
-    profile_url = f"{profile.profile.user_pic}?timestamp={int(time.time())}" # Add timestamp to prevent caching
+    most_common_color = get_most_common_color(profile.profile.user_pic_unique)
     
     # Create a base Embed object
     embed = discord.Embed(
@@ -84,7 +82,7 @@ def create_embed(profile, achievement_count, daily_points, daily_retropoints, ma
         color=most_common_color
     ).set_footer(
         text=f"Total Points: {profile.profile.total_points_format} • Total RetroPoints: {profile.profile.total_true_points_format}",
-        icon_url=profile_url
+        icon_url=profile.profile.user_pic_unique
     ).set_author(
         name=f"Daily Overview for {profile.profile.user}",
         icon_url=RETRO_DAILY_IMAGE

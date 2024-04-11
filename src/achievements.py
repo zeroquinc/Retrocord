@@ -1,6 +1,5 @@
 import discord
 from datetime import datetime
-import time
 
 from services.api import UserProgressGameInfo, UserCompletionRecent, UserProfile
 from utils.image_utils import get_most_common_color
@@ -74,13 +73,12 @@ def create_embed(game, user, achievement, profile, current, total):
     percentage = (completion / game.total_achievements) * 100
     unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
     most_common_color = get_most_common_color(achievement.badge_url)
-    profile_url = f"{profile.profile.user_pic}?timestamp={int(time.time())}" # Add timestamp to prevent caching
     embed = discord.Embed(description=f"**[{achievement.game_title}]({achievement.game_url})**\n\n{achievement.description}\n\nUnlocked by {game.achievements[achievement.title]['NumAwardedHardcore']} out of {game.total_players_hardcore} players ({unlock_percentage:.2f}%)", color=most_common_color)
     embed.add_field(name="Achievement", value=f"[{achievement.title}]({achievement.url})", inline=True)
     embed.add_field(name="Points", value=f"{achievement.points} ({achievement.retropoints_format})", inline=True)
     embed.add_field(name="Completion", value=f"{completion}/{game.total_achievements} ({percentage:.2f}%)", inline=True)
     embed.set_image(url=DISCORD_IMAGE)
     embed.set_thumbnail(url=achievement.badge_url)
-    embed.set_footer(text=f"{user} • Unlocked on {achievement.date_amsterdam}", icon_url=profile_url)
+    embed.set_footer(text=f"{user} • Unlocked on {achievement.date_amsterdam}", icon_url=profile.profile.user_pic_unique)
     embed.set_author(name=f"{achievement.mode} Achievement Unlocked", icon_url=achievement.game_icon)
     return embed

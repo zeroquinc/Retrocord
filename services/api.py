@@ -1,6 +1,7 @@
 import requests
 from datetime import datetime
 import pytz
+import time
 
 from config.config import API_INTERVAL
 
@@ -105,6 +106,7 @@ class Profile:
     def __init__(self, data):
         self.user = data.get('User') or "N/A"
         self.user_pic = f"{BASE_URL}{data.get('UserPic', '')}"
+        self.user_pic_unique = f"{self.user_pic}?timestamp={int(time.time())}"
         self.member_since = data.get('MemberSince') or "N/A"
         self.rich_presence_msg = data.get('RichPresenceMsg') or "N/A"
         self.last_game_id = data.get('LastGameID') or "N/A"
