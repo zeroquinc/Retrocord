@@ -2,13 +2,9 @@ import requests
 from PIL import Image
 from io import BytesIO
 from colorthief import ColorThief
-from collections import Counter
-"""
-A function to get the most common color in an image. 
-Returns a value that can be used as a color in a Discord Embed.
-"""
+import math
 
-def get_most_common_color(image_url, border_percentage=0.1):
+def get_discord_color(image_url, border_percentage=0.1):
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content))
 
@@ -27,20 +23,13 @@ def get_most_common_color(image_url, border_percentage=0.1):
     color_thief = ColorThief(BytesIO(img_byte_arr))
     palette = color_thief.get_palette(color_count=6, quality=5)
 
-    # count pixels of each color
-    pixels = list(img.getdata())
-    color_counts = Counter(pixels)
-
-    # find most common and colorful color
-    most_colorful_color = None
-    max_saturation = -1
-    max_count = -1
+    # find most distinct color
+    most_distinct_color = None
+    max_min_distance = -1
     for color in palette:
-        saturation = max(color) - min(color)  # calculate saturation
-        count = color_counts[color]
-        if saturation > 30 and count > max_count:  # lower saturation threshold to include more colors
-            max_saturation = saturation
-            max_count = count
-            most_colorful_color = color
+        min_distance = min([math.sqrt((color[0]-other_color[0])**2 + (color[1]-other_color[1])**2 + (color[2]-other_color[2])**2) for other_color in palette if color != other_color])
+        if min_distance > max_min_distance:
+            max_min_distance = min_distance
+            most_distinct_color = color
 
-    return most_colorful_color[0] * 256 * 256 + most_colorful_color[1] * 256 + most_colorful_color[2]
+    return most_distinct_color[0] * 256 * 256 + most_distinct_color[1] * 256 + most_distinct_color[2]

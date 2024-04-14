@@ -2,7 +2,7 @@ import discord
 from datetime import datetime
 
 from services.api import UserProgressGameInfo, UserCompletionRecent, UserProfile
-from utils.image_utils import get_most_common_color
+from utils.image_utils import get_discord_color
 from config.config import api_key, api_username, DISCORD_IMAGE
 
 from utils.custom_logger import logger
@@ -82,7 +82,7 @@ def create_embed(game, user, achievement, profile, current, total):
     completion = game.total_achievements_earned - total + current
     percentage = (completion / game.total_achievements) * 100
     unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
-    most_common_color = get_most_common_color(achievement.badge_url)
+    most_common_color = get_discord_color(achievement.badge_url)
     embed = discord.Embed(description=f"**[{achievement.game_title}]({achievement.game_url})** ({game.remap_console_name()}) \n\n{achievement.description}\n\nUnlocked by {game.achievements[achievement.title]['NumAwardedHardcore']} out of {game.total_players_hardcore} players ({unlock_percentage:.2f}%)", color=most_common_color)
     embed.add_field(name="Achievement", value=f"[{achievement.title}]({achievement.url})", inline=True)
     embed.add_field(name="Points", value=f"{achievement.points} ({achievement.retropoints_format})", inline=True)

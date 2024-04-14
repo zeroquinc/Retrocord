@@ -2,7 +2,7 @@ import discord
 
 from services.api import UserCompletionByDate, UserProfile
 
-from utils.image_utils import get_most_common_color
+from utils.image_utils import get_discord_color
 from utils.time_utils import get_now_and_yesterday_epoch
 from config.config import DISCORD_IMAGE, RETRO_DAILY_IMAGE
 
@@ -80,7 +80,7 @@ def favorite_game(user_completion):
         return None, None, None, None, None, None  # Return None if the dictionary is empty
     
 def create_embed(profile, achievement_count, daily_points, daily_retropoints, max_achievement, fav_game, fav_game_achievements, fav_url, fav_console_name, fav_game_points, fav_game_retropoints):
-    most_common_color = get_most_common_color(profile.profile.user_pic_unique)
+    most_common_color = get_discord_color(profile.profile.user_pic_unique)
     
     # Create a base Embed object
     embed = discord.Embed(
