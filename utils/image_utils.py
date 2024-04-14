@@ -2,11 +2,11 @@ import requests
 from PIL import Image
 from io import BytesIO
 from colorthief import ColorThief
-import math
+import numpy as np
 
 def get_discord_color(image_url, border_percentage=0.1):
     response = requests.get(image_url)
-    img = Image.open(BytesIO(response.content))
+    img = Image.open(BytesIO(response.content)).convert('RGB')
 
     # Crop the image to exclude borders
     width, height = img.size
@@ -21,15 +21,17 @@ def get_discord_color(image_url, border_percentage=0.1):
     img.save(img_byte_arr, format='PNG')
     img_byte_arr = img_byte_arr.getvalue()
     color_thief = ColorThief(BytesIO(img_byte_arr))
-    palette = color_thief.get_palette(color_count=6, quality=5)
+    palette = color_thief.get_palette(color_count=3, quality=1)
 
-    # find most distinct color
-    most_distinct_color = None
-    max_min_distance = -1
-    for color in palette:
-        min_distance = min([math.sqrt((color[0]-other_color[0])**2 + (color[1]-other_color[1])**2 + (color[2]-other_color[2])**2) for other_color in palette if color != other_color])
-        if min_distance > max_min_distance:
-            max_min_distance = min_distance
-            most_distinct_color = color
+    # Convert image to numpy array and count pixel occurrence for each color
+    img_arr = np.array(img)
+    color_counts = {tuple(color): np.sum(np.all(img_arr == np.array(color), axis=(0, 1))) for color in palette}
 
-    return most_distinct_color[0] * 256 * 256 + most_distinct_color[1] * 256 + most_distinct_color[2]
+    # find the color with the most pixels
+    most_common_color = max(color_counts, key=color_counts.get)
+
+    # Convert the color to hexadecimal format and then to an integer
+    hex_color = '#{:02x}{:02x}{:02x}'.format(*most_common_color)
+    int_color = int(hex_color[1:], 16)
+
+    return int_color
