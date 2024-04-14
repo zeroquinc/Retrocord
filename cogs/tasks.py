@@ -3,15 +3,17 @@ from discord.ext import tasks, commands
 from src.achievements import process_achievements
 from src.daily_overview import process_daily_overview
 from utils.time_utils import delay_until_next_15th_minute, delay_until_next_midnight
-from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID, MASTERY_CHANNEL_ID, API_INTERVAL
+from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID, MASTERY_CHANNEL_ID, API_INTERVAL, TASK_START_DELAY
 from utils.custom_logger import logger
 
 class TasksCog(commands.Cog):
-    def __init__(self, bot: commands.Bot, delay_start: bool = True) -> None:
+    def __init__(self, bot: commands.Bot, start_delay: dict = None) -> None:
         self.bot = bot
-        self.delay_start = delay_start
-        self.process_achievements.start()  # Start the task when the cog is loaded
-        self.process_daily_overview.start()  # Start the task when the cog is loaded
+        self.start_delay = start_delay if start_delay else {}
+        if not self.start_delay.get('process_achievements', True):
+            self.process_achievements.start()  # Start the task when the cog is loaded
+        if not self.start_delay.get('process_daily_overview', True):
+            self.process_daily_overview.start()  # Start the task when the cog is loaded
 
     @tasks.loop(minutes=API_INTERVAL)
     async def process_achievements(self):
@@ -25,7 +27,7 @@ class TasksCog(commands.Cog):
     @process_achievements.before_loop
     async def before_process_achievements(self):
         await self.bot.wait_until_ready()  # Wait until the bot has connected to the discord API
-        if self.delay_start:
+        if self.start_delay.get('process_achievements', True):
             delay = delay_until_next_15th_minute()  # Get the delay until the next 15th minute
             logger.info(f'Waiting {delay} seconds for Achievements task to start')
             await asyncio.sleep(delay)  # Wait for the specified delay
@@ -41,10 +43,10 @@ class TasksCog(commands.Cog):
     @process_daily_overview.before_loop
     async def before_process_daily_overview(self):
         await self.bot.wait_until_ready()  # Wait until the bot has connected to the discord API
-        if self.delay_start:
+        if self.start_delay.get('process_daily_overview', True):
             delay = delay_until_next_midnight()  # Get the delay until the next midnight
             logger.info(f'Waiting {delay} seconds for Daily Overview task to start')
             await asyncio.sleep(delay)  # Wait for the specified delay
 
 async def setup(bot):
-    await bot.add_cog(TasksCog(bot, delay_start=True)) # Change to False for debugging
+    await bot.add_cog(TasksCog(bot, start_delay=TASK_START_DELAY))

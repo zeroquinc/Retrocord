@@ -12,6 +12,7 @@ RETRO_DAILY_IMAGE: The image URL to use for the daily RetroAchievements embed, t
 ACHIEVEMENTS_CHANNEL_ID: The Discord channel ID to send achievement updates to
 DAILY_OVERVIEW_CHANNEL_ID: The Discord channel ID to send the daily RetroAchievements embed to
 API_INTERVAL: The number of minutes to wait between Achievement requests, default is 15 minutes, minimum is 1 minute
+TASK_START_DELAY: A dictionary to specify if the tasks should start immediately or wait until the next 15th minute, useful for debugging if set to False
 """
 
 api_key = ""
@@ -26,3 +27,8 @@ ACHIEVEMENTS_CHANNEL_ID = ""
 DAILY_OVERVIEW_CHANNEL_ID = ""
 MASTERY_CHANNEL_ID = ""
 API_INTERVAL = 15
+
+TASK_START_DELAY = {
+    'process_achievements': True,
+    'process_daily_overview': True
+}
