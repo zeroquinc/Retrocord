@@ -10,10 +10,8 @@ class TasksCog(commands.Cog):
     def __init__(self, bot: commands.Bot, start_delay: dict = None) -> None:
         self.bot = bot
         self.start_delay = start_delay if start_delay else {}
-        if not self.start_delay.get('process_achievements', True):
-            self.process_achievements.start()  # Start the task when the cog is loaded
-        if not self.start_delay.get('process_daily_overview', True):
-            self.process_daily_overview.start()  # Start the task when the cog is loaded
+        self.process_achievements.start()  # Always start the task when the cog is loaded
+        self.process_daily_overview.start()  # Always start the task when the cog is loaded
 
     @tasks.loop(minutes=API_INTERVAL)
     async def process_achievements(self):
@@ -27,7 +25,7 @@ class TasksCog(commands.Cog):
     @process_achievements.before_loop
     async def before_process_achievements(self):
         await self.bot.wait_until_ready()  # Wait until the bot has connected to the discord API
-        if self.start_delay.get('process_achievements', True):
+        if self.start_delay.get('process_achievements', False):  # Only delay the start of the task if its value in the start_delay dictionary is True
             delay = delay_until_next_15th_minute()  # Get the delay until the next 15th minute
             logger.info(f'Waiting {delay} seconds for Achievements task to start')
             await asyncio.sleep(delay)  # Wait for the specified delay
@@ -43,7 +41,7 @@ class TasksCog(commands.Cog):
     @process_daily_overview.before_loop
     async def before_process_daily_overview(self):
         await self.bot.wait_until_ready()  # Wait until the bot has connected to the discord API
-        if self.start_delay.get('process_daily_overview', True):
+        if self.start_delay.get('process_daily_overview', False):  # Only delay the start of the task if its value in the start_delay dictionary is True
             delay = delay_until_next_midnight()  # Get the delay until the next midnight
             logger.info(f'Waiting {delay} seconds for Daily Overview task to start')
             await asyncio.sleep(delay)  # Wait for the specified delay
