@@ -166,6 +166,18 @@ class Game:
         self.total_points = data.get('points_total') or "N/A"
         self.updated = data.get('Updated') or "N/A"
         self.url = f"{BASE_URL}/{self.id}" if self.id else "N/A"
+        self.user_completion_hardcore = data.get('UserCompletionHardcore', "N/A")
+
+    def is_completed(self):
+        """
+        Checks if the game is completed by the user.
+
+        Returns
+        -------
+        bool
+            True if the game is completed, False otherwise.
+        """
+        return self.user_completion_hardcore == "100.00%"
 
 class Achievement:
     """

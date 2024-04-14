@@ -7,8 +7,9 @@ from config.config import api_key, api_username, DISCORD_IMAGE
 
 from utils.custom_logger import logger
 
-async def process_achievements(users, api_username, api_key, channel):
-    all_embeds = []
+async def process_achievements(users, api_username, api_key, achievements_channel, mastery_channel):
+    achievement_embeds = []
+    mastery_embeds = []
     for user in users:
         try:
             user_completion = UserCompletionRecent(user, api_username, api_key)
@@ -19,17 +20,26 @@ async def process_achievements(users, api_username, api_key, channel):
                 achievements.sort(key=lambda x: datetime.strptime(x.date, "%Y-%m-%d %H:%M:%S"))
                 for i, achievement in enumerate(achievements):
                     embed = create_embed(game, user_completion.user, achievement, profile, i+1, len(achievements))
-                    all_embeds.append((datetime.strptime(achievement.date, "%Y-%m-%d %H:%M:%S"), embed))
+                    achievement_embeds.append((datetime.strptime(achievement.date, "%Y-%m-%d %H:%M:%S"), embed))
+                if game.is_completed():
+                    mastery_embed = create_mastery_embed(game, user_completion.user, profile)
+                    mastery_embeds.append((datetime.now(), mastery_embed))
         except Exception as e:
             logger.error(f'Error processing user {user}: {e}')
 
     # Sort by 'date' attribute, converting to datetime if necessary
-    all_embeds.sort(key=lambda x: x[0])
+    achievement_embeds.sort(key=lambda x: x[0])
+    mastery_embeds.sort(key=lambda x: x[0])
 
-    if all_embeds:
-        logger.info(f"Sending {len(all_embeds)} embeds to {channel}")
-        for i in range(0, len(all_embeds), 10):
-            await channel.send(embeds=[embed[1] for embed in all_embeds[i:i+10]])
+    if achievement_embeds:
+        logger.info(f"Sending {len(achievement_embeds)} embeds to {achievements_channel}")
+        for i in range(0, len(achievement_embeds), 10):
+            await achievements_channel.send(embeds=[embed[1] for embed in achievement_embeds[i:i+10]])
+
+    if mastery_embeds:
+        logger.info(f"Sending {len(mastery_embeds)} mastery embeds to {mastery_channel}")
+        for i in range(0, len(mastery_embeds), 10):
+            await mastery_channel.send(embeds=[embed[1] for embed in mastery_embeds[i:i+10]])
 
 def get_game_details(game_id, username, api_username, api_key, game_details_cache):
     cache_key = (game_id, username, api_username, api_key)
@@ -81,4 +91,10 @@ def create_embed(game, user, achievement, profile, current, total):
     embed.set_thumbnail(url=achievement.badge_url)
     embed.set_footer(text=f"{user} • Unlocked on {achievement.date_amsterdam}", icon_url=profile.profile.user_pic_unique)
     embed.set_author(name=f"{achievement.mode} Achievement Unlocked", icon_url=achievement.game_icon)
+    return embed
+
+def create_mastery_embed(game, user, profile):
+    embed = discord.Embed(description=f"**Mastery Achieved for {game.title} by {user}**")
+    embed.set_footer(text=f"{user} • Mastery achieved on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", icon_url=profile.profile.user_pic_unique)
+    embed.set_author(name=f"Mastery Achievement Unlocked", icon_url=game.image_icon)
     return embed
