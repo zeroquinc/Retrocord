@@ -83,7 +83,7 @@ def create_embed(game, user, achievement, profile, current, total):
     percentage = (completion / game.total_achievements) * 100
     unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
     most_common_color = get_most_common_color(achievement.badge_url)
-    embed = discord.Embed(description=f"**[{achievement.game_title}]({achievement.game_url})**\n\n{achievement.description}\n\nUnlocked by {game.achievements[achievement.title]['NumAwardedHardcore']} out of {game.total_players_hardcore} players ({unlock_percentage:.2f}%)", color=most_common_color)
+    embed = discord.Embed(description=f"**[{achievement.game_title}]({achievement.game_url})** ({game.remap_console_name()}) \n\n{achievement.description}\n\nUnlocked by {game.achievements[achievement.title]['NumAwardedHardcore']} out of {game.total_players_hardcore} players ({unlock_percentage:.2f}%)", color=most_common_color)
     embed.add_field(name="Achievement", value=f"[{achievement.title}]({achievement.url})", inline=True)
     embed.add_field(name="Points", value=f"{achievement.points} ({achievement.retropoints_format})", inline=True)
     embed.add_field(name="Completion", value=f"{completion}/{game.total_achievements} ({percentage:.2f}%)", inline=True)
@@ -94,7 +94,7 @@ def create_embed(game, user, achievement, profile, current, total):
     return embed
 
 def create_mastery_embed(game, user, profile):
-    embed = discord.Embed(description=f"**Mastery Achieved for {game.title} by {user}**")
+    embed = discord.Embed(description=f"**Mastery achieved for {game.title} by {user}**")
     embed.set_footer(text=f"{user} • Mastery achieved on {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", icon_url=profile.profile.user_pic_unique)
-    embed.set_author(name=f"Mastery Achievement Unlocked", icon_url=game.image_icon)
+    embed.set_author(name=f"Game Mastered", icon_url=game.image_icon)
     return embed

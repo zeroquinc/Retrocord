@@ -8,6 +8,23 @@ from config.config import API_INTERVAL
 BASE_URL = "https://retroachievements.org"
 
 """
+Renaming the console names to their abbreviations
+"""
+
+CONSOLE_NAME_MAP = {
+    "PlayStation 1": "PS1",
+    "PlayStation 2": "PS2",
+    "PlayStation Portable": "PSP",
+    "Nintendo 64": "N64",
+    "GameCube": "GC",
+    "Nintendo DS": "NDS",
+    "Nintendo 3DS": "3DS",
+    "Game Boy": "GB",
+    "Game Boy Color": "GBC",
+    "Game Boy Advance": "GBA",
+}
+
+"""
 BaseAPI: Base class for API requests
 """
 
@@ -127,6 +144,7 @@ class Game:
     """
     A class to represent a Game.
     """
+
     def __init__(self, data: dict):
         """
         Constructs all the necessary attributes for the Game object.
@@ -178,6 +196,17 @@ class Game:
             True if the game is completed, False otherwise.
         """
         return self.user_completion_hardcore == "100.00%"
+    
+    def remap_console_name(self):
+            """
+            Remaps the console name to its abbreviation.
+
+            Returns
+            -------
+            str
+                The abbreviation of the console name if it exists in the map, otherwise the original console name.
+            """
+            return CONSOLE_NAME_MAP.get(self.console_name, self.console_name)
 
 class Achievement:
     """
@@ -212,3 +241,14 @@ class Achievement:
         self.title = data.get('Title') or "N/A"
         self.type = data.get('Type') or "N/A"
         self.url = f"{BASE_URL}/achievement/{self.achievement_id}" if self.achievement_id else "N/A"
+
+    def remap_console_name(self):
+            """
+            Remaps the console name to its abbreviation.
+
+            Returns
+            -------
+            str
+                The abbreviation of the console name if it exists in the map, otherwise the original console name.
+            """
+            return CONSOLE_NAME_MAP.get(self.console_name, self.console_name)
