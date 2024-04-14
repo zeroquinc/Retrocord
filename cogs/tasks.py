@@ -47,4 +47,4 @@ class TasksCog(commands.Cog):
             await asyncio.sleep(delay)  # Wait for the specified delay
 
 async def setup(bot):
-    await bot.add_cog(TasksCog(bot, delay_start=False)) # Change to False for debugging
+    await bot.add_cog(TasksCog(bot, delay_start=True)) # Change to False for debugging
