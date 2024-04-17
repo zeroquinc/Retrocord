@@ -30,16 +30,17 @@ def get_discord_color(image_url, border_percentage=0.1, std_dev_threshold=10, lu
     # Exclude colors that are too close to black, white, or grey
     color_counts = {color: count for color, count in color_counts.items() if np.std(color) > std_dev_threshold}
 
-    # Calculate the brightness of each color and find the brightest one
-    brightness = {color: 0.2126*color[0] + 0.7152*color[1] + 0.0722*color[2] for color in color_counts.keys()}
-    brightest_color = max(brightness, key=brightness.get, default=None)
-
-    # If the brightest color is not bright enough, return the color with the most surface
-    if not brightest_color or brightness[brightest_color] < luminance_threshold:
-        brightest_color = max(color_counts, key=color_counts.get)
+    # Check if there's a shade of RGB
+    rgb_shades = [color for color in color_counts.keys() if color[0] == color[1] == color[2]]
+    if rgb_shades:
+        # If there's a shade of RGB, find the most distinct one
+        distinct_color = max(rgb_shades, key=lambda color: abs(color[0] - np.mean([c[0] for c in rgb_shades])))
+    else:
+        # If there's no shade of RGB, find the most used color
+        distinct_color = max(color_counts, key=color_counts.get)
 
     # Convert the color to hexadecimal format and then to an integer
-    hex_color = '0x{:02x}{:02x}{:02x}'.format(*brightest_color)
+    hex_color = '0x{:02x}{:02x}{:02x}'.format(*distinct_color)
     int_color = int(hex_color, 16)
 
     return int_color
