@@ -80,13 +80,17 @@ def favorite_game(user_completion):
         return None, None, None, None, None, None  # Return None if the dictionary is empty
     
 def create_embed(profile, achievement_count, daily_points, daily_retropoints, max_achievement, fav_game, fav_game_achievements, fav_url, fav_console_name, fav_game_points, fav_game_retropoints):
-    most_common_color = get_discord_color(profile.profile.user_pic_unique)
+    # Set Embed color based on max_achievement
+    if max_achievement is not None:
+        embed_color = get_discord_color(max_achievement.badge_url)
+    else:
+        embed_color = get_discord_color(profile.profile.user_pic_unique)
     
     # Create a base Embed object
     embed = discord.Embed(
         title='',
         description='',
-        color=most_common_color
+        color=embed_color
     ).set_footer(
         text=f"Total Points: {profile.profile.total_points_format} • Total RetroPoints: {profile.profile.total_true_points_format}",
         icon_url=profile.profile.user_pic_unique
