@@ -4,7 +4,7 @@ from io import BytesIO
 from colorthief import ColorThief
 import numpy as np
 
-def get_discord_color(image_url, border_percentage=0.1, std_dev_threshold=10, luminance_threshold=0.3):
+def get_discord_color(image_url, border_percentage=0.1, std_dev_threshold=10):
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content)).convert('RGB')
 
