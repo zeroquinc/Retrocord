@@ -84,7 +84,11 @@ def create_embed(game, user, achievement, profile, current, total):
     unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
     most_common_color = get_discord_color(achievement.badge_url)
     embed = discord.Embed(description=f"**[{achievement.game_title}]({achievement.game_url})** ({game.remap_console_name()}) \n\n{achievement.description}\n\nUnlocked by {game.achievements[achievement.title]['NumAwardedHardcore']} out of {game.total_players_hardcore} players ({unlock_percentage:.2f}%)", color=most_common_color)
-    embed.add_field(name="Achievement", value=f"[{achievement.title}]({achievement.url})", inline=True)
+    
+    # Check if achievement type is 'Missable'
+    achievement_title = f"[{achievement.title}]({achievement.url}) (m)" if achievement.type == "missable" else f"[{achievement.title}]({achievement.url})"
+
+    embed.add_field(name="Achievement", value=achievement_title, inline=True)
     embed.add_field(name="Points", value=f"{achievement.points} ({achievement.retropoints_format})", inline=True)
     embed.add_field(name="Completion", value=f"{completion}/{game.total_achievements} ({percentage:.2f}%)", inline=True)
     embed.set_image(url=DISCORD_IMAGE)
