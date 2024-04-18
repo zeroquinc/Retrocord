@@ -6,6 +6,7 @@ from config.config import API_INTERVAL, BASE_URL
 from services.profile import Profile
 from services.game import Game
 from services.achievement import Achievement
+from services.progress import Progress
 
 """
 BaseAPI: Base class for API requests
@@ -72,6 +73,12 @@ UserCompletionProgress: Get a user's completion progress, currently not used bec
 class UserCompletionProgress(BaseAPI):
     def __init__(self, username: str, api_username: str, api_key: str, count: int = 100, offset: int = 0):
         super().__init__("API_GetUserCompletionProgress.php", {'z': api_username, 'y': api_key, 'u': username, 'c': count, 'o': offset})
+        data = self.fetch_data()
+        self.user = username
+        self.progress = Progress(data)
+
+    def get_progress(self) -> Progress:
+        return self.progress
 
 """
 UserGameProgress: Get a user's progress in a game
