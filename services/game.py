@@ -43,7 +43,7 @@ class Game:
         self.total_players_softcore = data.get('NumDistinctPlayersCasual', "N/A")
         self.total_points = data.get('points_total', "N/A")
         self.updated = data.get('Updated', "N/A")
-        self.url = f"{BASE_URL}/{self.id}" if self.id != "N/A" else "N/A"
+        self.url = f"{BASE_URL}/game/{self.id}" if self.id != "N/A" else "N/A"
         self.user_completion_hardcore = data.get('UserCompletionHardcore', "N/A")
 
     def is_completed(self) -> bool:
