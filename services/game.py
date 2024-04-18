@@ -7,6 +7,7 @@ class Game:
     """
 
     def __init__(self, data: dict):
+
         """
         Constructs all the necessary attributes for the Game object.
 
@@ -15,6 +16,7 @@ class Game:
         data : dict
             The data dictionary containing all the game details.
         """
+
         self.achievement_set_version_hash = data.get('achievement_set_version_hash') or "N/A"
         self.achievements = {}
         achievements_data = data.get('Achievements') or {}
@@ -47,7 +49,8 @@ class Game:
         self.url = f"{BASE_URL}/{self.id}" if self.id else "N/A"
         self.user_completion_hardcore = data.get('UserCompletionHardcore', "N/A")
 
-    def is_completed(self):
+    def is_completed(self) -> bool:
+
         """
         Checks if the game is completed by the user.
 
@@ -56,9 +59,11 @@ class Game:
         bool
             True if the game is completed, False otherwise.
         """
+
         return self.user_completion_hardcore == "100.00%"
     
-    def remap_console_name(self):
+    def remap_console_name(self) -> str:
+
             """
             Remaps the console name to its abbreviation.
 
@@ -67,4 +72,5 @@ class Game:
             str
                 The abbreviation of the console name if it exists in the map, otherwise the original console name.
             """
+
             return CONSOLE_NAME_MAP.get(self.console_name, self.console_name)

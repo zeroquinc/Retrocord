@@ -4,10 +4,13 @@ import pytz
 from utils.achievement_utils import CONSOLE_NAME_MAP
 
 class Achievement:
+
     """
     A class to represent an Achievement.
     """
+
     def __init__(self, data: dict):
+
         """
         Constructs all the necessary attributes for the Achievement object.
 
@@ -16,6 +19,7 @@ class Achievement:
         data : dict
             The data dictionary containing all the achievement details.
         """
+
         self.achievement_id = data.get('AchievementID') or "N/A"
         self.author = data.get('Author') or "N/A"
         self.badge_name = data.get('BadgeName') or "N/A"
@@ -37,7 +41,8 @@ class Achievement:
         self.type = data.get('Type') or "N/A"
         self.url = f"{BASE_URL}/achievement/{self.achievement_id}" if self.achievement_id else "N/A"
 
-    def remap_console_name(self):
+    def remap_console_name(self) -> str:
+
             """
             Remaps the console name to its abbreviation.
 
@@ -46,4 +51,5 @@ class Achievement:
             str
                 The abbreviation of the console name if it exists in the map, otherwise the original console name.
             """
+
             return CONSOLE_NAME_MAP.get(self.console_name, self.console_name)
