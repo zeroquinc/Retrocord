@@ -1,8 +1,6 @@
 import discord
 from discord.ext import commands
-
 from config.config import token
-
 from utils.custom_logger import logger
 
 intents = discord.Intents.default()

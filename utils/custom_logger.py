@@ -1,13 +1,10 @@
 from loguru import logger
+import logging
 import json
 import sys
 import os
 
 LOG_LEVEL = 'DEBUG'
-
-"""
-This file contains the custom logger.
-"""
 
 # Function to switch the logger according to the LOG_LEVEL variable
 def switch_logger():
@@ -30,3 +27,19 @@ switch_logger()
 def log_json(json_obj, level='DEBUG'):
     pretty_json = json.dumps(json_obj, indent=4)
     logger.log(level, pretty_json)
+
+# Class to handle Discord's logging
+class DiscordHandler(logging.Handler):
+    def emit(self, record):
+        log_entry = self.format(record)
+        logger.log(record.levelno, log_entry)
+        # Ensure that this handler is the only one
+        if len(discord_logger.handlers) > 1:
+            discord_logger.handlers = [self]
+
+# Add Discord's logging to Loguru
+discord_logger = logging.getLogger('discord')
+discord_logger.handlers = []  # Remove all handlers
+discord_logger.setLevel(logging.DEBUG)
+discord_logger.addHandler(DiscordHandler())
+discord_logger.propagate = False  # Disable propagation
