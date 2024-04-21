@@ -18,6 +18,7 @@ class Profile:
         self.user = data.get('User', "N/A")
         self.user_pic = f"{BASE_URL}{data.get('UserPic', '')}"
         self.user_pic_unique = f"{self.user_pic}?timestamp={int(time.time())}"
+        self.user_url = f"{BASE_URL}/user/{self.user}"
         self.member_since = data.get('MemberSince', "N/A")
         self.rich_presence_msg = data.get('RichPresenceMsg', "N/A")
         self.last_game_id = data.get('LastGameID', "N/A")

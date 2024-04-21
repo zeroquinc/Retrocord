@@ -105,13 +105,16 @@ def create_embed(profile, achievement_count, daily_points, daily_retropoints, ma
     if max_achievement is not None:
         embed = embed.set_thumbnail(
             url=max_achievement.badge_url
-        ).add_field(
-            name="Game of the Day", value=f"[{fav_game}]({fav_url}) ({fav_console_name})\n\n{fav_game_achievements} achievements earned ({fav_game_points}) ({fav_game_retropoints})", inline=False
-        ).add_field(
-            name="Top Achievement", value=f"[{max_achievement.title}]({max_achievement.url}) ({max_achievement.points}) ({max_achievement.retropoints_format})", inline=False
-        ).add_field(
-            name="Daily Unlocks", value=f"{achievement_count} achievements earned ({daily_points}) ({daily_retropoints})", inline=False
         )
+        embed.description = f"""[{profile.profile.user}]({profile.profile.user_url}) has earned **{achievement_count}** achievements today.
+
+        [{fav_game}]({fav_url}) ({fav_console_name}) is the game with the most earned achievements today.\n**{fav_game_achievements}** achievements worth **{fav_game_points}** Points and **{fav_game_retropoints}** RetroPoints.
+
+        [{max_achievement.title}]({max_achievement.url}) from [{max_achievement.game_title}]({max_achievement.game_url}) ({max_achievement.remap_console_name()}) is the top achievement of the day.\n**{max_achievement.points}** Points and **{max_achievement.retropoints_format}** RetroPoints.
+        
+        ***{daily_points}** Points and **{daily_retropoints}** RetroPoints have been earned in total today.*
+
+        """
     else:
         embed.description = 'Nothing has been earned today.'
 
