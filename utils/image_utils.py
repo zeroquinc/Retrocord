@@ -30,6 +30,10 @@ def get_discord_color(image_url, border_percentage=0.1, std_dev_threshold=10):
     # Exclude colors that are too close to black, white, or grey
     color_counts = {color: count for color, count in color_counts.items() if np.std(color) > std_dev_threshold}
 
+    # If all colors are excluded, return a default color
+    if not color_counts:
+        return 0x000000  # Default color, change as needed
+
     # Check if there's a shade of RGB
     rgb_shades = [color for color in color_counts.keys() if color[0] == color[1] == color[2]]
     if rgb_shades:
