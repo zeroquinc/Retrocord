@@ -13,22 +13,23 @@ async def process_achievements(users, api_username, api_key, achievements_channe
     for user in users:
         try:
             user_completion = UserCompletionRecent(user, api_username, api_key)
-            profile = UserProfile(user, api_username, api_key)
-            game_details, game_achievements = get_achievements(user_completion)
-            for game_id, achievements in game_achievements.items():
-                game = game_details[game_id]
-                achievements.sort(key=lambda x: datetime.strptime(x.date, "%Y-%m-%d %H:%M:%S"))
-                for i, achievement in enumerate(achievements):
-                    embed = create_embed(game, user_completion.user, achievement, profile, i+1, len(achievements))
-                    achievement_embeds.append((datetime.strptime(achievement.date, "%Y-%m-%d %H:%M:%S"), embed))
-                if game.is_completed():
-                    user_progress = UserCompletionProgress(user, api_username, api_key)
-                    progress = user_progress.get_progress()
-                    mastered_count = progress.count_mastered()
-                    game_progress = next((result for result in progress.results if result.game_id == game.id), None)
-                    if game_progress:
-                        mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count)
-                        mastery_embeds.append((datetime.now(), mastery_embed))
+            if user_completion:  # Check if user_completion is not empty before making another API call
+                profile = UserProfile(user, api_username, api_key)
+                game_details, game_achievements = get_achievements(user_completion)
+                for game_id, achievements in game_achievements.items():
+                    game = game_details[game_id]
+                    achievements.sort(key=lambda x: datetime.strptime(x.date, "%Y-%m-%d %H:%M:%S"))
+                    for i, achievement in enumerate(achievements):
+                        embed = create_embed(game, user_completion.user, achievement, profile, i+1, len(achievements))
+                        achievement_embeds.append((datetime.strptime(achievement.date, "%Y-%m-%d %H:%M:%S"), embed))
+                    if game.is_completed():
+                        user_progress = UserCompletionProgress(user, api_username, api_key)
+                        progress = user_progress.get_progress()
+                        mastered_count = progress.count_mastered()
+                        game_progress = next((result for result in progress.results if result.game_id == game.id), None)
+                        if game_progress:
+                            mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count)
+                            mastery_embeds.append((datetime.now(), mastery_embed))
         except Exception as e:
             logger.error(f'Error processing user {user}: {e}')
 
