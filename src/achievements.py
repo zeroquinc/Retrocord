@@ -13,7 +13,7 @@ async def process_achievements(users, api_username, api_key, achievements_channe
     for user in users:
         try:
             user_completion = UserCompletionRecent(user, api_username, api_key)
-            if user_completion:  # Check if user_completion is not empty before making another API call
+            if user_completion.achievements:  # Check if user_completion is not empty before making another API call
                 profile = UserProfile(user, api_username, api_key)
                 game_details, game_achievements = get_achievements(user_completion)
                 for game_id, achievements in game_achievements.items():
