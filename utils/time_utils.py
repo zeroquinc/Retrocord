@@ -1,5 +1,6 @@
 import pytz
 from datetime import datetime, timedelta
+from config.config import API_INTERVAL
 
 """
 A function to get the epoch time of yesterday and now in the Europe/Amsterdam timezone.
@@ -19,9 +20,10 @@ def get_now_and_yesterday_epoch():
 A function to calculate the delay until the next 15th minute.
 """
 
-def delay_until_next_15th_minute():
+def delay_until_next_interval():
     now = datetime.now()
-    minutes = (now.minute // 15 + 1) * 15
+    interval = API_INTERVAL
+    minutes = (now.minute // interval + 1) * interval
     if minutes < 60:
         future = now.replace(minute=minutes, second=0, microsecond=0)
     else:

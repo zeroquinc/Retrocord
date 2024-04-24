@@ -2,7 +2,7 @@ import asyncio
 from discord.ext import tasks, commands
 from src.achievements import process_achievements
 from src.daily_overview import process_daily_overview
-from utils.time_utils import delay_until_next_15th_minute, delay_until_next_midnight
+from utils.time_utils import delay_until_next_interval, delay_until_next_midnight
 from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID, MASTERY_CHANNEL_ID, API_INTERVAL, TASK_START_DELAY
 from utils.custom_logger import logger
 
@@ -26,7 +26,7 @@ class TasksCog(commands.Cog):
     async def before_process_achievements(self):
         await self.bot.wait_until_ready()  # Wait until the bot has connected to the discord API
         if self.start_delay.get('process_achievements', False):  # Only delay the start of the task if its value in the start_delay dictionary is True
-            delay = delay_until_next_15th_minute()  # Get the delay until the next 15th minute
+            delay = delay_until_next_interval()  # Get the delay until the next 15th minute
             logger.info(f'Waiting {delay} seconds for Achievements task to start')
             await asyncio.sleep(delay)  # Wait for the specified delay
 
