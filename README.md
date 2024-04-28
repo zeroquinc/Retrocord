@@ -9,25 +9,25 @@ Some features:
 * Clickable links to the RetroAchievement site
 * Set Completion
 * Amount of Points & RetroPoints
-* Achievement of the Day & Game of the Day
+* Achievement of the Day & Game of the Day!
 
 ## Examples
 
 <table>
   <tr>
     <td>
-      <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/3004372e-4c66-4a20-948a-02cd73020402" alt="image1">
+      <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/4eaaefb7-3a87-452a-86f8-d1ed0f2ddc41" alt="image1">
     </td>
     <td>
-      <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/d4bb0bda-3bf8-49a7-abfc-4165daea6d36" alt="image2">
+      <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/75f3bfa2-c08a-4852-819a-71f6fccfaa0e" alt="image2">
     </td>
   </tr>
   <tr>
     <td>
-      <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/bdacb06d-4287-4e8d-8637-67b340c97e3f" alt="image3">
+      <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/e06d49ee-5e5d-4205-8899-1dfb5aedb0c5" alt="image3">
     </td>
     <td>
-      <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/4018e90a-fbfd-4b3e-a730-9cd31b4892e5" alt="image4">
+      <img src="https://github.com/zeroquinc/Retrocord/assets/39315068/5aa85411-27a1-4063-98b5-144f1f46b434" alt="image4">
     </td>
   </tr>
 </table>
