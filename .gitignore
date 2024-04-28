@@ -164,3 +164,6 @@ cython_debug/
 
 # Config files
 config.py
+
+# json files
+*.json
