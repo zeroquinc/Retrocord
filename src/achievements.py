@@ -20,7 +20,7 @@ async def process_achievements(users, api_username, api_key, achievements_channe
                     game = game_details[game_id]
                     achievements.sort(key=lambda x: datetime.strptime(x.date, "%Y-%m-%d %H:%M:%S"))
                     for i, achievement in enumerate(achievements):
-                        embed = create_embed(game, user_completion.user, achievement, profile, i+1, len(achievements))
+                        embed = create_achievement_embed(game, user_completion.user, achievement, profile, i+1, len(achievements))
                         achievement_embeds.append((datetime.strptime(achievement.date, "%Y-%m-%d %H:%M:%S"), embed))
                     if game.is_completed():
                         user_progress = UserCompletionProgress(user, api_username, api_key)
@@ -84,7 +84,7 @@ def get_achievements(user_completion):
     except Exception as e:
         logger.error(f'Error getting achievements for user {user_completion.user}: {e}')
 
-def create_embed(game, user, achievement, profile, current, total):
+def create_achievement_embed(game, user, achievement, profile, current, total):
     completion = game.total_achievements_earned - total + current
     percentage = (completion / game.total_achievements) * 100
     unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
