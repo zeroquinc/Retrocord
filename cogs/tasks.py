@@ -2,8 +2,9 @@ import asyncio
 from discord.ext import tasks, commands
 from src.achievements import process_achievements
 from src.daily_overview import process_daily_overview
+from src.presence import process_presence
 from utils.time_utils import delay_until_next_interval, delay_until_next_midnight
-from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID, MASTERY_CHANNEL_ID, API_INTERVAL, TASK_START_DELAY
+from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID, MASTERY_CHANNEL_ID, API_INTERVAL, PRESENCE_INTERVAL, TASK_START_DELAY
 from utils.custom_logger import logger
 
 class TasksCog(commands.Cog):
@@ -12,6 +13,9 @@ class TasksCog(commands.Cog):
         self.start_delay = start_delay if start_delay else {}
         self.process_achievements.start()  # Always start the task when the cog is loaded
         self.process_daily_overview.start()  # Always start the task when the cog is loaded
+        self.users = users
+        self.current_user_index = 0
+        self.process_presence.start()
 
     @tasks.loop(minutes=API_INTERVAL)
     async def process_achievements(self):
@@ -44,6 +48,23 @@ class TasksCog(commands.Cog):
         if self.start_delay.get('process_daily_overview', False):  # Only delay the start of the task if its value in the start_delay dictionary is True
             delay = delay_until_next_midnight()  # Get the delay until the next midnight
             logger.info(f'Waiting {delay} seconds for Daily Overview task to start')
+            await asyncio.sleep(delay)  # Wait for the specified delay
+
+    @tasks.loop(minutes=PRESENCE_INTERVAL)
+    async def process_presence(self):
+        try:
+            user = self.users[self.current_user_index]
+            await process_presence(self.bot, user, api_username, api_key)
+            self.current_user_index = (self.current_user_index + 1) % len(self.users)
+        except Exception as e:
+            logger.error(f'Error processing presence: {e}')
+
+    @process_presence.before_loop
+    async def before_process_presence(self):
+        await self.bot.wait_until_ready()  # Wait until the bot has connected to the discord API
+        if self.start_delay.get('process_presence', False):  # Only delay the start of the task if its value in the start_delay dictionary is True
+            delay = delay_until_next_interval()  # Get the delay until the next 15th minute
+            logger.info(f'Waiting {delay} seconds for Presence task to start')
             await asyncio.sleep(delay)  # Wait for the specified delay
 
 async def setup(bot):
