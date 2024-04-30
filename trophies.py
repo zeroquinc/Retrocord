@@ -24,7 +24,7 @@ for trophy_title in client.trophy_titles_for_title(title_ids=title_ids):
     print("Trophy Title Icon URL:", trophy_title.title_icon_url)
 
     # Get all trophies for the title
-    all_trophies = client.trophies(np_communication_id=trophy_title.np_communication_id, platform='PS4', trophy_group_id='all', include_metadata=True)
+    all_trophies = client.trophies(np_communication_id=trophy_title.np_communication_id, platform='PS4_game', trophy_group_id='all', include_metadata=True)
 
     # Print the icon URLs of all earned trophies
     for trophy in all_trophies:
