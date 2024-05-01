@@ -27,9 +27,11 @@ BASE_URL = "https://retroachievements.org"
 DISCORD_IMAGE = "https://i.postimg.cc/KvSTwcQ0/undefined-Imgur.png"
 RETRO_DAILY_IMAGE = "https://i.imgur.com/P0nEGGs.png"
 
+PSNTOKEN = ""
 ACHIEVEMENTS_CHANNEL_ID = ""
 DAILY_OVERVIEW_CHANNEL_ID = ""
 MASTERY_CHANNEL_ID = ""
+TROPHIES_CHANNEL_ID = ""
 API_INTERVAL = 5
 PRESENCE_INTERVAL = 120
 
@@ -37,5 +39,6 @@ PRESENCE_INTERVAL = 120
 TASK_START_DELAY = {
     'process_achievements': True,
     'process_daily_overview': True,
-    'process_presence': True
+    'process_presence': True,
+    'process_trophies': True
 }
