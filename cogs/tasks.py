@@ -5,7 +5,7 @@ from src.daily_overview import process_daily_overview
 from src.trophies import process_trophies
 from src.presence import process_presence
 from utils.time_utils import delay_until_next_interval, delay_until_next_midnight
-from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID, MASTERY_CHANNEL_ID, API_INTERVAL, PRESENCE_INTERVAL, TASK_START_DELAY, TROPHIES_CHANNEL_ID
+from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID, MASTERY_CHANNEL_ID, TROPHIES_CHANNEL_ID, RETROACHIEVEMENTS_INTERVAL, PRESENCE_INTERVAL, TROPHIES_INTERVAL, TASK_START_DELAY
 from utils.custom_logger import logger
 
 class TasksCog(commands.Cog):
@@ -21,7 +21,7 @@ class TasksCog(commands.Cog):
         self.current_user_index = 0
         self.process_presence.start()
 
-    @tasks.loop(hours=24)
+    @tasks.loop(minutes=TROPHIES_INTERVAL)
     async def process_trophies(self):
         trophies_channel = self.bot.get_channel(TROPHIES_CHANNEL_ID)
         try:
@@ -37,7 +37,7 @@ class TasksCog(commands.Cog):
             logger.info(f'Waiting {delay} seconds for Trophies task to start')
             await asyncio.sleep(delay)  # Wait for the specified delay
 
-    @tasks.loop(minutes=API_INTERVAL)
+    @tasks.loop(minutes=RETROACHIEVEMENTS_INTERVAL)
     async def process_achievements(self):
         achievements_channel = self.bot.get_channel(ACHIEVEMENTS_CHANNEL_ID)
         mastery_channel = self.bot.get_channel(MASTERY_CHANNEL_ID)

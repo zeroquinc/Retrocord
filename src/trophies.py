@@ -4,7 +4,7 @@ from psnawp_api import PSNAWP
 
 from utils.image_utils import get_discord_color
 from utils.date_utils import format_date
-from config.config import PSNTOKEN, DISCORD_IMAGE
+from config.config import PSNTOKEN, DISCORD_IMAGE, TROPHIES_INTERVAL
 
 from utils.custom_logger import logger
 
@@ -21,11 +21,13 @@ def get_client():
 def get_current_time():
     return datetime.now(timezone.utc)
 
-def get_recent_titles(client, days=4):
+def get_recent_titles(client, minutes=TROPHIES_INTERVAL):
     logger.debug("Making API call to title_stats")
     now = get_current_time()
     titles = list(client.title_stats())
-    return [title.title_id for title in titles if title.last_played_date_time > now - timedelta(days=days)]
+    title_ids = [title.title_id for title in titles if title.last_played_date_time > now - timedelta(minutes=minutes)]
+    logger.debug(f"Returning title IDs: {title_ids}")
+    return title_ids
 
 def get_earned_trophies(client, title_ids):
     logger.debug("Making API call to trophy_titles_for_title")

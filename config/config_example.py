@@ -32,7 +32,8 @@ ACHIEVEMENTS_CHANNEL_ID = ""
 DAILY_OVERVIEW_CHANNEL_ID = ""
 MASTERY_CHANNEL_ID = ""
 TROPHIES_CHANNEL_ID = ""
-API_INTERVAL = 5
+RETROACHIEVEMENTS_INTERVAL = 5
+TROPHIES_INTERVAL = 60
 PRESENCE_INTERVAL = 120
 
 # The delay before starting the tasks, useful for debugging, otherwise it will start within the first 15th minute
