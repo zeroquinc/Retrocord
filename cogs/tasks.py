@@ -33,7 +33,7 @@ class TasksCog(commands.Cog):
     async def before_process_trophies(self):
         await self.bot.wait_until_ready()  # Wait until the bot has connected to the discord API
         if self.start_delay.get('process_trophies', False):  # Only delay the start of the task if its value in the start_delay dictionary is True
-            delay = delay_until_next_midnight()  # Get the delay until the next midnight
+            delay = delay_until_next_interval('trophies')  # Calculate the delay
             logger.info(f'Waiting {delay} seconds for Trophies task to start')
             await asyncio.sleep(delay)  # Wait for the specified delay
 
@@ -50,7 +50,7 @@ class TasksCog(commands.Cog):
     async def before_process_achievements(self):
         await self.bot.wait_until_ready()  # Wait until the bot has connected to the discord API
         if self.start_delay.get('process_achievements', False):  # Only delay the start of the task if its value in the start_delay dictionary is True
-            delay = delay_until_next_interval()  # Get the delay until the next 15th minute
+            delay = delay_until_next_interval('retro')  # Calculate the delay
             logger.info(f'Waiting {delay} seconds for Achievements task to start')
             await asyncio.sleep(delay)  # Wait for the specified delay
 
@@ -83,7 +83,7 @@ class TasksCog(commands.Cog):
     async def before_process_presence(self):
         await self.bot.wait_until_ready()  # Wait until the bot has connected to the discord API
         if self.start_delay.get('process_presence', False):  # Only delay the start of the task if its value in the start_delay dictionary is True
-            delay = delay_until_next_interval()  # Get the delay until the next 15th minute
+            delay = delay_until_next_interval('presence')  # Get the delay until the next 15th minute
             logger.info(f'Waiting {delay} seconds for Presence task to start')
             await asyncio.sleep(delay)  # Wait for the specified delay
 
