@@ -1,7 +1,7 @@
 import requests
 from typing import List, Optional
 
-from config.config import API_INTERVAL, BASE_URL
+from config.config import RETROACHIEVEMENTS_INTERVAL, BASE_URL
 from utils.custom_logger import logger
 
 from services.profile import Profile
@@ -47,7 +47,7 @@ UserCompletionRecent: Get a user's recent achievements, defaults to 15 minutes
 
 class UserCompletionRecent(BaseAPI):
     def __init__(self, username: str, api_username: str, api_key: str):
-        super().__init__("API_GetUserRecentAchievements.php", {'z': api_username, 'y': api_key, 'u': username, 'm': API_INTERVAL})
+        super().__init__("API_GetUserRecentAchievements.php", {'z': api_username, 'y': api_key, 'u': username, 'm': RETROACHIEVEMENTS_INTERVAL})
         logger.debug(f"Fetching recent data for user {username}")
         data = self.fetch_data()
         logger.debug(f"API response: {data}")
