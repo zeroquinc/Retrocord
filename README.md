@@ -5,6 +5,7 @@ This bot is designed to keep track of your achievements and share them with your
 Support for:
 
 [RetroAchievements](https://retroachievements.org)
+
 [Sony PSN](https://www.playstation.com)
 
 Some features:
@@ -52,6 +53,7 @@ To get started you need to obtain npsso <64 character code>. You need to follow 
 ```
 
 This npsso code will be used in the api for authentication purposes. The refresh token that is generated from npsso lasts about 2 months.
+
 From: https://psnawp.readthedocs.io/en/latest/additional_resources/README.html#getting-started
 
 ## Getting Started
