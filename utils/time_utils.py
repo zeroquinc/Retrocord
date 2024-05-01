@@ -1,6 +1,6 @@
 import pytz
 from datetime import datetime, timedelta
-from config.config import RETROACHIEVEMENTS_INTERVAL
+from config.config import RETROACHIEVEMENTS_INTERVAL, TROPHIES_INTERVAL, PRESENCE_INTERVAL
 
 """
 A function to get the epoch time of yesterday and now in the Europe/Amsterdam timezone.
@@ -17,12 +17,17 @@ def get_now_and_yesterday_epoch():
     return yesterday_epoch, now_epoch
 
 """
-A function to calculate the delay until the next 15th minute.
+A function to calculate the delay to start the task until the next interval
 """
 
-def delay_until_next_interval():
+def delay_until_next_interval(interval_type):
     now = datetime.now()
-    interval = RETROACHIEVEMENTS_INTERVAL
+    if interval_type == 'retro':
+        interval = RETROACHIEVEMENTS_INTERVAL
+    elif interval_type == 'trophies':
+        interval = TROPHIES_INTERVAL
+    else:
+        interval = PRESENCE_INTERVAL
     minutes = (now.minute // interval + 1) * interval
     if minutes < 60:
         future = now.replace(minute=minutes, second=0, microsecond=0)
