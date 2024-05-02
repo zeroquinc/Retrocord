@@ -113,7 +113,7 @@ def create_mastery_embed(game, user, profile, game_progress, mastered_count, mas
     embed = discord.Embed(description=f"**[{game.title}]({game.url})** ({game.remap_console_name()}) \n\nThis is [{user}]({profile.profile.user_url})'s **{mastered_count}** mastery!\n\nMastered in {mastery_time}\n\nMastered by {highest_unlock} out of {game.total_players_hardcore} players ({mastery_percentage}%)", color=most_common_color)
     embed.set_footer(text=f"{user} • Mastery achieved on {game_progress.highest_award_date_format}", icon_url=profile.profile.user_pic_unique)
     embed.add_field(name="Achievements", value=f"{game.total_achievements}", inline=True)
-    embed.add_field(name="Points", value=f"{game.total_points}", inline=True)
+    embed.add_field(name="Points", value=f"{game.total_points} ({game.calculate_total_true_ratio()})", inline=True)
     embed.set_author(name=f"Game Mastered", icon_url=game.image_icon)
     embed.set_image(url=DISCORD_IMAGE)
     embed.set_thumbnail(url=game.image_icon)
