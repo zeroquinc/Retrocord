@@ -11,7 +11,7 @@ from utils.custom_logger import logger
 class TasksCog(commands.Cog):
     def __init__(self, bot: commands.Bot, start_delay: dict = None) -> None:
         self.bot = bot
-        self.start_delay = start_delay if start_delay else {}
+        self.start_delay = start_delay or {}
         self.process_achievements.start()  # Always start the task when the cog is loaded
         self.process_daily_overview.start()  # Always start the task when the cog is loaded
         self.process_trophies.start()  # Always start the task when the cog is loaded

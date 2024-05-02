@@ -59,8 +59,10 @@ def process_game_mastery(game, user_completion, profile, mastery_embeds):
     mastered_count = progress.count_mastered()
     mastery_time = game.days_since_last_achievement()
     mastery_percentage = round((highest_unlock / game.total_players_hardcore) * 100, 2)
-    game_progress = next((result for result in progress.results if result.game_id == game.id), None)
-    if game_progress:
+    if game_progress := next(
+        (result for result in progress.results if result.game_id == game.id),
+        None,
+    ):
         logger.info(f"{user_completion.user} has mastered {game.title}! {game.total_achievements} achievements have been earned in {mastery_time}! {highest_unlock} out of {game.total_players_hardcore} players have mastered the game! ({mastery_percentage}%)")
         mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage)
         mastery_embeds.append((datetime.now(), mastery_embed))
@@ -83,8 +85,9 @@ async def send_mastery_embeds(mastery_embeds, mastery_channel):
 
 def get_game_details(game_id, username, api_username, api_key):
     try:
-        game = UserProgressGameInfo(game_id, username, api_username, api_key).get_game()
-        return game
+        return UserProgressGameInfo(
+            game_id, username, api_username, api_key
+        ).get_game()
     except Exception as e:
         logger.error(f'Error getting game progress details for game {game_id}: {e}')
 
@@ -139,7 +142,7 @@ def create_mastery_embed(game, user, profile, game_progress, mastered_count, mas
     embed.set_footer(text=f"{user} • Mastery achieved on {game_progress.highest_award_date_format}", icon_url=profile.profile.user_pic_unique)
     embed.add_field(name="Achievements", value=f"{game.total_achievements}", inline=True)
     embed.add_field(name="Points", value=f"{game.total_points} ({game.calculate_total_true_ratio()})", inline=True)
-    embed.set_author(name=f"Game Mastered", icon_url=game.image_icon)
+    embed.set_author(name="Game Mastered", icon_url=game.image_icon)
     embed.set_image(url=DISCORD_IMAGE)
     embed.set_thumbnail(url=game.image_icon)
     return embed
