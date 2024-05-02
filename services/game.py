@@ -1,5 +1,6 @@
 from config.config import BASE_URL
 from utils.achievement_utils import CONSOLE_NAME_MAP
+from utils.time_utils import calculate_time_difference
 
 class Game:
     """
@@ -67,3 +68,29 @@ class Game:
             The abbreviation of the console name if it exists in the map, otherwise the original console name.
         """
         return CONSOLE_NAME_MAP.get(self.console_name, self.console_name)
+    
+    def days_since_last_achievement(self) -> str:
+        """
+        Calculate the time passed between the first and last hardcore achievement earned by the user.
+
+        Returns
+        -------
+        str
+            A string representing the time passed between the first and last hardcore achievement.
+        """
+        earliest_achievement_date = None
+        latest_achievement_date = None
+        achievements_data = self.achievements.values()
+
+        for achievement_data in achievements_data:
+            date_earned_hardcore = achievement_data.get('DateEarnedHardcore')
+            if date_earned_hardcore:
+                if not earliest_achievement_date or date_earned_hardcore < earliest_achievement_date:
+                    earliest_achievement_date = date_earned_hardcore
+                if not latest_achievement_date or date_earned_hardcore > latest_achievement_date:
+                    latest_achievement_date = date_earned_hardcore
+
+        if earliest_achievement_date and latest_achievement_date:
+            return calculate_time_difference(earliest_achievement_date, latest_achievement_date)
+        else:
+            return "No hardcore achievements earned"

@@ -47,3 +47,49 @@ def delay_until_next_midnight():
     next_midnight = datetime.combine(now + timedelta(days=1), datetime.min.time())
     seconds_until = (next_midnight - now).total_seconds()
     return round(seconds_until)
+
+"""
+A function to calculate the time difference between two dates
+"""
+
+def calculate_time_difference(earliest_date_str: str, latest_date_str: str) -> str:
+    format_str = '%Y-%m-%d %H:%M:%S'
+    earliest_date = datetime.strptime(earliest_date_str, format_str)
+    latest_date = datetime.strptime(latest_date_str, format_str)
+    
+    total_seconds = int((latest_date - earliest_date).total_seconds())
+    minutes, seconds = divmod(total_seconds, 60)
+    hours, minutes = divmod(minutes, 60)
+    days, hours = divmod(hours, 24)
+    months, days = divmod(days, 30)
+    years, months = divmod(months, 12)
+    
+    time_units = []
+    if years > 0:
+        time_units.append(f"{years} year{'s' if years > 1 else ''}")
+    if months > 0:
+        time_units.append(f"{months} month{'s' if months > 1 else ''}")
+    if days > 0:
+        time_units.append(f"{days} day{'s' if days > 1 else ''}")
+    if hours > 0:
+        time_units.append(f"{hours} hour{'s' if hours > 1 else ''}")
+    if minutes > 0:
+        time_units.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
+    
+    if len(time_units) > 1:
+        last = time_units.pop()
+        return ', '.join(time_units) + ' and ' + last
+    elif time_units:
+        return time_units[0]
+    else:
+        return '0 minutes'
+    
+"""
+A function to get the ordinal suffix of a number
+"""
+    
+def ordinal(n):
+    suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n % 10, 4)]
+    if 11 <= (n % 100) <= 13:
+        suffix = 'th'
+    return str(n) + suffix
