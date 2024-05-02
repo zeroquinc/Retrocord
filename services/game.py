@@ -106,5 +106,6 @@ class UnlockDistribution:
         self.data = data
 
     def get_highest_unlock(self):
-        highest_unlock = max(int(pair[0]) for pair in self.data)
-        return highest_unlock
+        sorted_keys = sorted(self.data, key=int, reverse=True)  # Sort keys as integers in descending order
+        highest_unlock_key = next((key for key in sorted_keys if self.data[key] != 0), None)
+        return self.data[highest_unlock_key] if highest_unlock_key is not None else None
