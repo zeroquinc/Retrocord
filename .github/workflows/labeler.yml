@@ -12,10 +12,8 @@ jobs:
 
       - name: Install GitHub CLI
         run: |
-          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
-          sudo apt-add-repository https://cli.github.com/packages
-          sudo apt update
-          sudo apt install gh
+          curl -OL https://github.com/cli/cli/releases/download/v2.4.0/gh_2.4.0_linux_amd64.deb
+          sudo dpkg -i gh_2.4.0_linux_amd64.deb
 
       - name: Get PR number
         id: pr_number
