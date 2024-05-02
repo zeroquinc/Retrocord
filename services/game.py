@@ -1,6 +1,6 @@
 from config.config import BASE_URL
 from utils.achievement_utils import CONSOLE_NAME_MAP
-from utils.time_utils import calculate_time_difference
+from utils.time_utils import calculate_time_difference, ordinal
 
 class Game:
     """
@@ -94,3 +94,17 @@ class Game:
             return calculate_time_difference(earliest_achievement_date, latest_achievement_date)
         else:
             return "No hardcore achievements earned"
+
+class UnlockDistribution:
+    """
+    A call to this endpoint will retrieve a dictionary 
+    of the number of players who have earned a specific number of achievements 
+    for a given game ID. This endpoint can be used to determine 
+    the total mastery count for a game, as well as how rare that overall mastery is.
+    """
+    def __init__(self, data):
+        self.data = data
+
+    def get_highest_unlock(self):
+        highest_unlock = max(int(pair[0]) for pair in self.data)
+        return highest_unlock
