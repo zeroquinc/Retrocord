@@ -30,11 +30,11 @@ async def process_presence(bot, user, api_username, api_key):
             with open('games.json', 'w') as f:
                 json.dump(games, f, indent=4)
         else:
-            logger.info(f"Game ID {last_game_id} found in JSON.")
+            logger.info(f"Rich Presence Game ID {last_game_id} found in JSON.")
             game_title = game_data["title"]
             game_platform = game_data["platform"]
 
         await bot.change_presence(activity=discord.Game(name=f"{game_title} ({game_platform})"))
-        logger.info(f"Set bot's rich presence to {game_title} ({game_platform}) for {user}")
+        logger.info(f"Setting rich presence to {game_title} ({game_platform}) for {user}")
     except Exception as e:
         logger.error(f'Error processing user {user}: {e}')
