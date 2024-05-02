@@ -95,6 +95,23 @@ class Game:
         else:
             return "No hardcore achievements earned"
 
+    def calculate_total_true_ratio(self) -> str:
+        """
+        Calculates the total TrueRatio for all achievements.
+
+        Returns
+        -------
+        str
+            The total TrueRatio for all achievements, formatted with points.
+        """
+        total_true_ratio = 0.0
+        for achievement_data in self.achievements.values():
+            true_ratio = achievement_data.get('TrueRatio')
+            if true_ratio is not None:
+                total_true_ratio += true_ratio
+        # Format the total as an integer with commas, then replace commas with points (cause we're cool like that)
+        return "{:,}".format(int(total_true_ratio)).replace(',', '.')
+
 class UnlockDistribution:
     """
     A call to this endpoint will retrieve a dictionary 
