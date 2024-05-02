@@ -121,7 +121,7 @@ class UserProfile(BaseAPI):
     
 class GameUnlocks(BaseAPI):
     def __init__(self, username: str, api_key: str, game_id: str):
-        super().__init__("API_GetAchievementDistribution.php", {'z': username, 'y': api_key, 'i': game_id})
+        super().__init__("API_GetAchievementDistribution.php", {'z': username, 'y': api_key, 'i': game_id, 'h': '1'})
         logger.debug(f"Fetching Achievement Distribution data for game {game_id}")
         data = self.fetch_data()
         logger.debug(f"API response: {data}")
