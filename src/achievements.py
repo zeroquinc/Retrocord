@@ -1,7 +1,7 @@
 import discord
 from datetime import datetime
 
-from services.api import UserProgressGameInfo, UserCompletionRecent, UserProfile, UserCompletionProgress
+from services.api import UserProgressGameInfo, UserCompletionRecent, UserProfile, UserCompletionProgress, GameUnlocks
 from utils.image_utils import get_discord_color
 from config.config import api_key, api_username, DISCORD_IMAGE
 
@@ -24,12 +24,16 @@ async def process_achievements(users, api_username, api_key, achievements_channe
                         achievement_embeds.append((datetime.strptime(achievement.date, "%Y-%m-%d %H:%M:%S"), embed))
                     if game.is_completed():
                         user_progress = UserCompletionProgress(user, api_username, api_key)
+                        game_unlocks = GameUnlocks(api_username, api_key, game.id)
+                        unlock_distribution = game_unlocks.get_distribution()
+                        highest_unlock = unlock_distribution.get_highest_unlock()
                         progress = user_progress.get_progress()
                         mastered_count = progress.count_mastered()
                         mastery_time = game.days_since_last_achievement()
+                        mastery_percentage = round((highest_unlock / game.total_players_hardcore) * 100, 2)
                         game_progress = next((result for result in progress.results if result.game_id == game.id), None)
                         if game_progress:
-                            mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count, mastery_time)
+                            mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage)
                             mastery_embeds.append((datetime.now(), mastery_embed))
         except Exception as e:
             logger.error(f'Error processing user {user}: {e}')
@@ -104,9 +108,9 @@ def create_achievement_embed(game, user, achievement, profile, current, total):
     embed.set_author(name=f"{achievement.mode} Achievement Unlocked", icon_url=achievement.game_icon)
     return embed
 
-def create_mastery_embed(game, user, profile, game_progress, mastered_count, mastery_time):
+def create_mastery_embed(game, user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage):
     most_common_color = get_discord_color(game.image_icon)
-    embed = discord.Embed(description=f"**[{game.title}]({game.url})** ({game.remap_console_name()}) \n\nThis is [{user}]({profile.profile.user_url})'s **{mastered_count}** mastery!\n\nMastered in {mastery_time}", color=most_common_color)
+    embed = discord.Embed(description=f"**[{game.title}]({game.url})** ({game.remap_console_name()}) \n\nThis is [{user}]({profile.profile.user_url})'s **{mastered_count}** mastery!\n\nMastered in {mastery_time}\n\nMastered by {highest_unlock} out of {game.total_players_hardcore} players ({mastery_percentage}%)", color=most_common_color)
     embed.set_footer(text=f"{user} • Mastery achieved on {game_progress.highest_award_date_format}", icon_url=profile.profile.user_pic_unique)
     embed.add_field(name="Achievements", value=f"{game.total_achievements}", inline=True)
     embed.add_field(name="Points", value=f"{game.total_points}", inline=True)

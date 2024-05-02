@@ -5,7 +5,7 @@ from config.config import RETROACHIEVEMENTS_INTERVAL, BASE_URL
 from utils.custom_logger import logger
 
 from services.profile import Profile
-from services.game import Game
+from services.game import Game, UnlockDistribution
 from services.achievement import Achievement
 from services.progress import Progress
 
@@ -118,3 +118,14 @@ class UserProfile(BaseAPI):
 
     def get_profile(self) -> Profile:
         return self.profile
+    
+class GameUnlocks(BaseAPI):
+    def __init__(self, username: str, api_key: str, game_id: str):
+        super().__init__("API_GetAchievementDistribution.php", {'z': username, 'y': api_key, 'i': game_id})
+        logger.debug(f"Fetching Achievement Distribution data for game {game_id}")
+        data = self.fetch_data()
+        logger.debug(f"API response: {data}")
+        self.distribution = UnlockDistribution(data)
+
+    def get_distribution(self) -> UnlockDistribution:
+        return self.distribution
