@@ -4,6 +4,9 @@ from config.config import RETROACHIEVEMENTS_INTERVAL, TROPHIES_INTERVAL, PRESENC
 
 """
 A function to get the epoch time of yesterday and now in the Europe/Amsterdam timezone.
+
+Returns:
+Tuple of two integers representing the epoch time of yesterday and now.
 """
 
 def get_now_and_yesterday_epoch():
@@ -17,7 +20,13 @@ def get_now_and_yesterday_epoch():
     return yesterday_epoch, now_epoch
 
 """
-A function to calculate the delay to start the task until the next interval
+A function to calculate the delay to start the task until the next interval.
+
+Args:
+- interval_type: Type of interval ('retro', 'trophies', or other).
+
+Returns:
+Integer representing the delay in seconds until the next interval.
 """
 
 def delay_until_next_interval(interval_type):
@@ -39,7 +48,10 @@ def delay_until_next_interval(interval_type):
     return round(delta_s)
 
 """
-A function to calculate the delay until the next midnight
+A function to calculate the delay until the next midnight.
+
+Returns:
+Integer representing the delay in seconds until the next midnight.
 """
 
 def delay_until_next_midnight():
@@ -49,7 +61,14 @@ def delay_until_next_midnight():
     return round(seconds_until)
 
 """
-A function to calculate the time difference between two dates
+A function to calculate the time difference between two dates.
+
+Args:
+- earliest_date_str: String representing the earliest date.
+- latest_date_str: String representing the latest date.
+
+Returns:
+String representing the time difference in a human-readable format.
 """
 
 def calculate_time_difference(earliest_date_str: str, latest_date_str: str) -> str:
@@ -58,12 +77,23 @@ def calculate_time_difference(earliest_date_str: str, latest_date_str: str) -> s
     latest_date = datetime.strptime(latest_date_str, format_str)
     
     total_seconds = int((latest_date - earliest_date).total_seconds())
-    minutes, seconds = divmod(total_seconds, 60)
+    minutes, _ = divmod(total_seconds, 60)
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
     months, days = divmod(days, 30)
     years, months = divmod(months, 12)
     
+    time_units = format_time_units(years, months, days, hours, minutes)
+    
+    if len(time_units) > 1:
+        last = time_units.pop()
+        return ', '.join(time_units) + ' and ' + last
+    elif time_units:
+        return time_units[0]
+    else:
+        return '0 minutes'
+
+def format_time_units(years, months, days, hours, minutes):
     time_units = []
     if years > 0:
         time_units.append(f"{years} year{'s' if years > 1 else ''}")
@@ -76,16 +106,16 @@ def calculate_time_difference(earliest_date_str: str, latest_date_str: str) -> s
     if minutes > 0:
         time_units.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
     
-    if len(time_units) > 1:
-        last = time_units.pop()
-        return ', '.join(time_units) + ' and ' + last
-    elif time_units:
-        return time_units[0]
-    else:
-        return '0 minutes'
+    return time_units
     
 """
-A function to get the ordinal suffix of a number
+A function to get the ordinal suffix of a number.
+
+Args:
+- n: Number for which the ordinal suffix is to be determined.
+
+Returns:
+String representing the number with its ordinal suffix.
 """
     
 def ordinal(n):
