@@ -13,6 +13,7 @@ async def process_achievements(users, api_username, api_key, achievements_channe
     for user in users:
         try:
             user_completion = UserCompletionRecent(user, api_username, api_key)
+            logger.info(f'Starting to get achievements for user {user}')
             if user_completion.achievements:  # Check if user_completion is not empty before making another API call
                 profile = UserProfile(user, api_username, api_key)
                 game_details, game_achievements = get_achievements(user_completion)
@@ -33,10 +34,15 @@ async def process_achievements(users, api_username, api_key, achievements_channe
                         mastery_percentage = round((highest_unlock / game.total_players_hardcore) * 100, 2)
                         game_progress = next((result for result in progress.results if result.game_id == game.id), None)
                         if game_progress:
+                            logger.info(f"{user} has mastered {game.title}! {game.total_achievements} achievements have been earned in {mastery_time}! {highest_unlock} out of {game.total_players_hardcore} players have mastered the game! ({mastery_percentage}%)")
                             mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage)
                             mastery_embeds.append((datetime.now(), mastery_embed))
+            else:
+                logger.info(f'No achievements found for user {user}')
         except Exception as e:
             logger.error(f'Error processing user {user}: {e}')
+
+        logger.info(f'Finished fetching achievements for user {user}')
 
     # Sort by 'date' attribute, converting to datetime if necessary
     achievement_embeds.sort(key=lambda x: x[0])
@@ -52,19 +58,12 @@ async def process_achievements(users, api_username, api_key, achievements_channe
         for i in range(0, len(mastery_embeds), 10):
             await mastery_channel.send(embeds=[embed[1] for embed in mastery_embeds[i:i+10]])
 
-def get_game_details(game_id, username, api_username, api_key, game_details_cache):
-    cache_key = (game_id, username, api_username, api_key)
-    if cache_key in game_details_cache:
-        logger.debug(f'Using cached game details for game {game_id}')
-        return game_details_cache[cache_key]
-
+def get_game_details(game_id, username, api_username, api_key):
     try:
         game = UserProgressGameInfo(game_id, username, api_username, api_key).get_game()
-        logger.debug(f'Fetched game details for game {game_id}')
-        game_details_cache[cache_key] = game
         return game
     except Exception as e:
-        logger.error(f'Error getting game details for game {game_id}: {e}')
+        logger.error(f'Error getting game progress details for game {game_id}: {e}')
 
 def get_achievements(user_completion):
     try:
@@ -72,7 +71,6 @@ def get_achievements(user_completion):
         game_ids = set()
         game_details = {}
         game_achievements = {}
-        game_details_cache = {}
 
         for achievement in achievements:
             game_ids.add(achievement.game_id)
@@ -81,9 +79,13 @@ def get_achievements(user_completion):
                 game_achievements[achievement.game_id] = []
             game_achievements[achievement.game_id].append(achievement)
 
+        logger.debug(f'Found {len(game_ids)} unique game IDs in achievements')
+
         for game_id in game_ids:
-            game = get_game_details(game_id, user_completion.user, api_username, api_key, game_details_cache)
+            logger.info(f'Getting game progress details for game {game_id}')
+            game = get_game_details(game_id, user_completion.user, api_username, api_key)
             game_details[game_id] = game
+            logger.info(f'Got game progress details for game {game_id}')
 
         return game_details, game_achievements
     except Exception as e:
