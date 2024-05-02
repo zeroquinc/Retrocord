@@ -1,0 +1,41 @@
+name: Label PRs based on commit messages
+
+on:
+  push:
+
+jobs:
+  labelPR:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+          sudo apt-add-repository https://cli.github.com/packages
+          sudo apt update
+          sudo apt install gh
+
+      - name: Get PR number
+        id: pr_number
+        run: |
+          PR_NUMBER=$(gh pr list --json number,headRefName --jq ".[] | select(.headRefName == \"${{ github.ref }}\") | .number")
+          echo "::set-output name=number::$PR_NUMBER"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add label
+        run: |
+          COMMIT_MSG=$(git log --format=%B -n 1 ${{ github.sha }})
+          if [[ "$COMMIT_MSG" == fix:* ]]; then
+            gh pr edit ${{ steps.pr_number.outputs.number }} --add-label "fix"
+          elif [[ "$COMMIT_MSG" == feature:* ]]; then
+            gh pr edit ${{ steps.pr_number.outputs.number }} --add-label "feature"
+          elif [[ "$COMMIT_MSG" == chore:* ]]; then
+            gh pr edit ${{ steps.pr_number.outputs.number }} --add-label "chore"
+          elif [[ "$COMMIT_MSG" == enhancement:* ]]; then
+            gh pr edit ${{ steps.pr_number.outputs.number }} --add-label "enhancement"
+          fi
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
