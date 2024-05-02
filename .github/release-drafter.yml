@@ -1,0 +1,18 @@
+draft:
+  - title: "v${NEXT_VERSION}"
+    body: |
+      <!--
+      Thank you for contributing to this release! 🚀
+      Please review the changes below.
+      -->
+
+categories:
+  - title: "🐛 Bug Fixes"
+    labels:
+      - "bug"
+  - title: "✨ New Features"
+    labels:
+      - "feature"
+  - title: "🔧 Enhancements"
+    labels:
+      - "enhancement"
