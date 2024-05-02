@@ -12,31 +12,14 @@ async def process_achievements(users, api_username, api_key, achievements_channe
     mastery_embeds = []
     for user in users:
         try:
-            user_completion = UserCompletionRecent(user, api_username, api_key)
-            logger.info(f'Starting to get achievements for user {user}')
-            if user_completion.achievements:  # Check if user_completion is not empty before making another API call
-                profile = UserProfile(user, api_username, api_key)
-                game_details, game_achievements = get_achievements(user_completion)
+            user_completion = get_user_completion(user, api_username, api_key)
+            if user_completion.achievements:
+                profile, game_details, game_achievements = get_user_profile_and_achievements(user_completion)
                 for game_id, achievements in game_achievements.items():
                     game = game_details[game_id]
-                    achievements.sort(key=lambda x: datetime.strptime(x.date, "%Y-%m-%d %H:%M:%S"))
-                    for i, achievement in enumerate(achievements):
-                        embed = create_achievement_embed(game, user_completion.user, achievement, profile, i+1, len(achievements))
-                        achievement_embeds.append((datetime.strptime(achievement.date, "%Y-%m-%d %H:%M:%S"), embed))
+                    process_game_achievements(game, user_completion, achievements, profile, achievement_embeds)
                     if game.is_completed():
-                        user_progress = UserCompletionProgress(user, api_username, api_key)
-                        game_unlocks = GameUnlocks(api_username, api_key, game.id)
-                        unlock_distribution = game_unlocks.get_distribution()
-                        highest_unlock = unlock_distribution.get_highest_unlock()
-                        progress = user_progress.get_progress()
-                        mastered_count = progress.count_mastered()
-                        mastery_time = game.days_since_last_achievement()
-                        mastery_percentage = round((highest_unlock / game.total_players_hardcore) * 100, 2)
-                        game_progress = next((result for result in progress.results if result.game_id == game.id), None)
-                        if game_progress:
-                            logger.info(f"{user} has mastered {game.title}! {game.total_achievements} achievements have been earned in {mastery_time}! {highest_unlock} out of {game.total_players_hardcore} players have mastered the game! ({mastery_percentage}%)")
-                            mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage)
-                            mastery_embeds.append((datetime.now(), mastery_embed))
+                        process_game_mastery(game, user_completion, profile, mastery_embeds)
             else:
                 logger.info(f'No achievements found for user {user}')
         except Exception as e:
@@ -44,15 +27,55 @@ async def process_achievements(users, api_username, api_key, achievements_channe
 
         logger.info(f'Finished fetching achievements for user {user}')
 
-    # Sort by 'date' attribute, converting to datetime if necessary
-    achievement_embeds.sort(key=lambda x: x[0])
-    mastery_embeds.sort(key=lambda x: x[0])
+    await send_achievement_embeds(achievement_embeds, achievements_channel)
+    await send_mastery_embeds(mastery_embeds, mastery_channel)
 
+
+def get_user_completion(user, api_username, api_key):
+    user_completion = UserCompletionRecent(user, api_username, api_key)
+    logger.info(f'Starting to get achievements for user {user}')
+    return user_completion
+
+
+def get_user_profile_and_achievements(user_completion):
+    profile = UserProfile(user_completion.user, api_username, api_key)
+    game_details, game_achievements = get_achievements(user_completion)
+    return profile, game_details, game_achievements
+
+
+def process_game_achievements(game, user_completion, achievements, profile, achievement_embeds):
+    achievements.sort(key=lambda x: datetime.strptime(x.date, "%Y-%m-%d %H:%M:%S"))
+    for i, achievement in enumerate(achievements):
+        embed = create_achievement_embed(game, user_completion.user, achievement, profile, i+1, len(achievements))
+        achievement_embeds.append((datetime.strptime(achievement.date, "%Y-%m-%d %H:%M:%S"), embed))
+
+
+def process_game_mastery(game, user_completion, profile, mastery_embeds):
+    user_progress = UserCompletionProgress(user_completion.user, api_username, api_key)
+    game_unlocks = GameUnlocks(api_username, api_key, game.id)
+    unlock_distribution = game_unlocks.get_distribution()
+    highest_unlock = unlock_distribution.get_highest_unlock()
+    progress = user_progress.get_progress()
+    mastered_count = progress.count_mastered()
+    mastery_time = game.days_since_last_achievement()
+    mastery_percentage = round((highest_unlock / game.total_players_hardcore) * 100, 2)
+    game_progress = next((result for result in progress.results if result.game_id == game.id), None)
+    if game_progress:
+        logger.info(f"{user_completion.user} has mastered {game.title}! {game.total_achievements} achievements have been earned in {mastery_time}! {highest_unlock} out of {game.total_players_hardcore} players have mastered the game! ({mastery_percentage}%)")
+        mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage)
+        mastery_embeds.append((datetime.now(), mastery_embed))
+
+
+async def send_achievement_embeds(achievement_embeds, achievements_channel):
+    achievement_embeds.sort(key=lambda x: x[0])
     if achievement_embeds:
         logger.info(f"Sending {len(achievement_embeds)} embeds to {achievements_channel}")
         for i in range(0, len(achievement_embeds), 10):
             await achievements_channel.send(embeds=[embed[1] for embed in achievement_embeds[i:i+10]])
 
+
+async def send_mastery_embeds(mastery_embeds, mastery_channel):
+    mastery_embeds.sort(key=lambda x: x[0])
     if mastery_embeds:
         logger.info(f"Sending {len(mastery_embeds)} mastery embeds to {mastery_channel}")
         for i in range(0, len(mastery_embeds), 10):

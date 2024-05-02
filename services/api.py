@@ -35,7 +35,8 @@ class GameDetails(BaseAPI):
         super().__init__("API_GetGameExtended.php", {'z': api_username, 'y': api_key, 'i': game_id})
         logger.debug(f"Fetching game details for game {game_id}")
         data = self.fetch_data()
-        logger.debug(f"API response: {data}")
+        truncated_data = str(data)[:1000]  # Convert the data to a string and take the first 1000 characters (because the response is huge)
+        logger.debug(f"API response (truncated): {truncated_data}")
         self.game = Game(data)
 
     def get_game(self) -> Game:
