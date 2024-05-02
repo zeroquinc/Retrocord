@@ -34,9 +34,9 @@ def get_discord_color(image_url, border_percentage=0.1, std_dev_threshold=10):
     if not color_counts:
         return 0x000000  # Default color, change as needed
 
-    # Check if there's a shade of RGB
-    rgb_shades = [color for color in color_counts.keys() if color[0] == color[1] == color[2]]
-    if rgb_shades:
+    if rgb_shades := [
+        color for color in color_counts if color[0] == color[1] == color[2]
+    ]:
         # If there's a shade of RGB, find the most distinct one
         distinct_color = max(rgb_shades, key=lambda color: abs(color[0] - np.mean([c[0] for c in rgb_shades])))
     else:
@@ -45,6 +45,4 @@ def get_discord_color(image_url, border_percentage=0.1, std_dev_threshold=10):
 
     # Convert the color to hexadecimal format and then to an integer
     hex_color = '0x{:02x}{:02x}{:02x}'.format(*distinct_color)
-    int_color = int(hex_color, 16)
-
-    return int_color
+    return int(hex_color, 16)

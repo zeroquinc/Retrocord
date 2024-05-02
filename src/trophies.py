@@ -78,8 +78,7 @@ async def process_trophies_embeds(client, title_ids):
 
 async def process_trophies(trophies_channel):
     client = get_client()
-    title_ids = get_recent_titles(client)
-    if title_ids:
+    if title_ids := get_recent_titles(client):
         trophy_embeds, total_trophies_earned = await process_trophies_embeds(client, title_ids)
         # Filter out trophy embeds with None earned date before sorting
         trophy_embeds = [te for te in trophy_embeds if te[0] is not None]

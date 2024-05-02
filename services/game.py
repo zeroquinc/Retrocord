@@ -83,8 +83,7 @@ class Game:
         achievements_data = self.achievements.values()
 
         for achievement_data in achievements_data:
-            date_earned_hardcore = achievement_data.get('DateEarnedHardcore')
-            if date_earned_hardcore:
+            if date_earned_hardcore := achievement_data.get('DateEarnedHardcore'):
                 if not earliest_achievement_date or date_earned_hardcore < earliest_achievement_date:
                     earliest_achievement_date = date_earned_hardcore
                 if not latest_achievement_date or date_earned_hardcore > latest_achievement_date:

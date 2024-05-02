@@ -24,8 +24,7 @@ class BaseAPI:
         url = f"{self.BASE_API_URL}{self.endpoint}"
         response = requests.get(url, params=self.params)
         response.raise_for_status()
-        data = response.json()
-        return data
+        return response.json()
 
 """
 GameDetails: Get details about a game

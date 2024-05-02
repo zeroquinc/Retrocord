@@ -10,15 +10,19 @@ LOG_LEVEL = 'DEBUG'
 def switch_logger():
     logger.remove()
     if LOG_LEVEL in ['DEBUG', 'INFO']:
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
-        log_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <level>{message}</level>"
-        if LOG_LEVEL == 'DEBUG':
-            log_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <red>{file}</red> | <yellow>{function}</yellow> | <level>{message}</level>"
-        logger.add(sys.stdout, level=LOG_LEVEL, colorize=True, format=log_format)
-        logger.add('logs/retrocord.log', level=LOG_LEVEL, colorize=True, format=log_format)
+        create_logger()
     else:
         raise ValueError("Invalid log level")
+
+# Function to create the logger
+def create_logger():
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    log_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <level>{message}</level>"
+    if LOG_LEVEL == 'DEBUG':
+        log_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <red>{file}</red> | <yellow>{function}</yellow> | <level>{message}</level>"
+    logger.add(sys.stdout, level=LOG_LEVEL, colorize=True, format=log_format)
+    logger.add('logs/retrocord.log', level=LOG_LEVEL, colorize=True, format=log_format)
 
 # Call the function to set the logger according to the LOG_LEVEL variable
 switch_logger()

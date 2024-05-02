@@ -30,8 +30,7 @@ async def process_daily_overview(users, api_username, api_key, channel):
             await channel.send(embeds=all_embeds[i:i+10])
 
 def count_daily_points(user_completion):
-    achievements = user_completion.get_achievements()
-    if achievements:  # checks if the sequence is not empty
+    if achievements := user_completion.get_achievements():
         achievement_count = len(achievements)
         daily_points = sum(achievement.points for achievement in achievements)
         daily_retropoints = sum(achievement.retropoints for achievement in achievements)
@@ -47,12 +46,15 @@ def count_daily_points(user_completion):
     return achievement_count, daily_points, daily_retropoints
 
 def find_max_achievement(user_completion):
-    achievements = user_completion.get_achievements()
-    if achievements:  # checks if the sequence is not empty
-        max_achievement = max(achievements, key=lambda achievement: (achievement.points, achievement.retropoints)) # Find the achievement with the most points, if there are multiple, the one with the highest RetroPoints is chosen
-    else:
-        max_achievement = None
-    return max_achievement
+    # Find the achievement with the most points, if there are multiple, the one with the highest RetroPoints is chosen
+    return (
+        max(
+            (achievements := user_completion.get_achievements()),
+            key=lambda achievement: (achievement.points, achievement.retropoints),
+        )
+        if achievements
+        else None
+    )
 
 def favorite_game(user_completion):
     achievements = user_completion.get_achievements()
@@ -69,15 +71,18 @@ def favorite_game(user_completion):
             game_counts[achievement.game_title] = [1, achievement.game_url, achievement.remap_console_name(), achievement.points, achievement.retropoints]
     # Find the game with the most achievements
     if game_counts:  # checks if the dictionary is not empty
-        favorite_game = max(game_counts, key=lambda x: game_counts[x][0])
-        fav_game_points = game_counts[favorite_game][3]
-        fav_game_retropoints = game_counts[favorite_game][4]
-        # Format fav_game_points and fav_game_retropoints if they are greater than or equal to 10000
-        fav_game_points = format(fav_game_points, ',').replace(',', '.') if fav_game_points >= 10000 else str(fav_game_points)
-        fav_game_retropoints = format(fav_game_retropoints, ',').replace(',', '.') if fav_game_retropoints >= 10000 else str(fav_game_retropoints)
-        return favorite_game, game_counts[favorite_game][0], game_counts[favorite_game][1], game_counts[favorite_game][2], fav_game_points, fav_game_retropoints
+        return extract_favorite_game(game_counts)
     else:
         return None, None, None, None, None, None  # Return None if the dictionary is empty
+
+def extract_favorite_game(game_counts):
+    favorite_game = max(game_counts, key=lambda x: game_counts[x][0])
+    fav_game_points = game_counts[favorite_game][3]
+    fav_game_retropoints = game_counts[favorite_game][4]
+    # Format fav_game_points and fav_game_retropoints if they are greater than or equal to 10000
+    fav_game_points = format(fav_game_points, ',').replace(',', '.') if fav_game_points >= 10000 else str(fav_game_points)
+    fav_game_retropoints = format(fav_game_retropoints, ',').replace(',', '.') if fav_game_retropoints >= 10000 else str(fav_game_retropoints)
+    return favorite_game, game_counts[favorite_game][0], game_counts[favorite_game][1], game_counts[favorite_game][2], fav_game_points, fav_game_retropoints
     
 def create_embed(profile, achievement_count, daily_points, daily_retropoints, max_achievement, fav_game, fav_game_achievements, fav_url, fav_console_name, fav_game_points, fav_game_retropoints):
     # Set Embed color based on max_achievement
