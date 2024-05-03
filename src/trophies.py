@@ -38,7 +38,7 @@ def get_earned_trophies(client, title_ids):
         trophies.extend((trophy, trophy_title) for trophy in earned_trophies)
     return trophies
 
-def create_trophy_embed(trophy, trophy_title, client, total_trophies_earned, current, total, total_trophies):
+def create_trophy_embed(trophy, trophy_title, client, current, total_trophies):
     most_common_color = get_discord_color(trophy.trophy_icon_url)
     completion = current
     percentage = (completion / total_trophies) * 100
@@ -71,7 +71,7 @@ async def process_trophies_embeds(client, title_ids):
 
     for i, (trophy, trophy_title) in enumerate(earned_trophies):
         # Pass total_trophies to create_trophy_embed function
-        embed = create_trophy_embed(trophy, trophy_title, client, total_trophies_earned, i + 1, total_trophies, total_trophies)
+        embed = create_trophy_embed(trophy, trophy_title, client, i + 1, total_trophies)
         trophy_embeds.append((trophy.earned_date_time, embed))
 
     return trophy_embeds, total_trophies_earned
@@ -79,7 +79,7 @@ async def process_trophies_embeds(client, title_ids):
 async def process_trophies(trophies_channel):
     client = get_client()
     if title_ids := get_recent_titles(client):
-        trophy_embeds, total_trophies_earned = await process_trophies_embeds(client, title_ids)
+        trophy_embeds = await process_trophies_embeds(client, title_ids)
         # Filter out trophy embeds with None earned date before sorting
         trophy_embeds = [te for te in trophy_embeds if te[0] is not None]
         trophy_embeds.sort(key=lambda x: x[0])  # Sort embeds by trophy earned date
