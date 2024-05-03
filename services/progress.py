@@ -4,6 +4,22 @@ import pytz
 from utils.time_utils import ordinal
 
 class Progress:
+    """
+    Represents progress data with count, total, and results.
+
+    Args:
+        data : dict
+            A dictionary containing 'Count', 'Total', and 'Results' keys.
+
+    Returns
+    -------
+    Progress
+        An instance of Progress class.
+
+    Examples
+    --------
+    progress = Progress(data)
+    """
     def __init__(self, data):
         self.count, self.total, self.results = data.get('Count'), data.get('Total'), [Result(result) for result in data.get('Results', [])]
 
@@ -16,6 +32,22 @@ class Progress:
         return ordinal(count)
 
 class Result:
+    """
+    Represents a result with various attributes.
+
+    Args:
+        data : dict
+            A dictionary containing attributes like 'GameID', 'Title', etc.
+
+    Returns
+    -------
+    Result
+        An instance of Result class.
+
+    Examples
+    --------
+    result = Result(data)
+    """
     def __init__(self, data):
         (self.game_id, self.title, self.image_icon, self.console_id, self.console_name, self.max_possible, 
          self.num_awarded, self.num_awarded_hardcore, self.most_recent_awarded_date, self.highest_award_kind, 
@@ -34,12 +66,11 @@ class Result:
     def format_date(self, date: str) -> str:
         """
         Formats the date to Amsterdam timezone.
-    
-        Parameters
-        ----------
-        date : str
-            The date to be formatted.
-    
+
+        Args:
+            date : str
+                The date to be formatted.
+
         Returns
         -------
         str
