@@ -1,12 +1,13 @@
 import discord
 
 from services.api import UserCompletionByDate, UserProfile
-
 from utils.image_utils import get_discord_color
 from utils.time_utils import get_now_and_yesterday_epoch
 from config.config import DISCORD_IMAGE, RETRO_DAILY_IMAGE
-
 from utils.custom_logger import logger
+
+def format_points(points):
+    return format(points, ',').replace(',', '.') if points >= 10000 else str(points)
 
 async def process_daily_overview(users, api_username, api_key, channel):
     all_embeds = []
@@ -15,11 +16,12 @@ async def process_daily_overview(users, api_username, api_key, channel):
             yesterday, now = get_now_and_yesterday_epoch()
             user_completion = UserCompletionByDate(user, api_username, api_key, yesterday, now)
             profile = UserProfile(user, api_username, api_key)
-            achievement_count, daily_points, daily_retropoints = count_daily_points(user_completion)
-            max_achievement = find_max_achievement(user_completion)
-            fav_game, fav_game_achievements, fav_url, fav_console_name, fav_game_points, fav_game_retropoints = favorite_game(user_completion)
-            logger.info(f"{user} has earned {achievement_count} achievements today, totaling {daily_points} points and {daily_retropoints} RetroPoints. Their favorite game is {fav_game} with {fav_game_achievements} achievements.")
-            embed = create_embed(profile, achievement_count, daily_points, daily_retropoints, max_achievement, fav_game, fav_game_achievements, fav_url, fav_console_name, fav_game_points, fav_game_retropoints)
+            achievements = user_completion.get_achievements()
+            achievement_count, daily_points, daily_retropoints = count_daily_points(achievements)
+            max_achievement = find_max_achievement(achievements)
+            fav_game_details = favorite_game(achievements)
+            logger.info(f"{user} has earned {achievement_count} achievements today, totaling {daily_points} points and {daily_retropoints} RetroPoints. Their favorite game is {fav_game_details[0]} with {fav_game_details[1]} achievements.")
+            embed = create_embed(profile, achievement_count, daily_points, daily_retropoints, max_achievement, *fav_game_details)
             all_embeds.append(embed)
         except Exception as e:
             logger.error(f'Error processing user {user}: {e}')
@@ -29,74 +31,34 @@ async def process_daily_overview(users, api_username, api_key, channel):
         for i in range(0, len(all_embeds), 10):
             await channel.send(embeds=all_embeds[i:i+10])
 
-def count_daily_points(user_completion):
-    if achievements := user_completion.get_achievements():
-        achievement_count = len(achievements)
-        daily_points = sum(achievement.points for achievement in achievements)
-        daily_retropoints = sum(achievement.retropoints for achievement in achievements)
-    else:
-        achievement_count = 0
-        daily_points = 0
-        daily_retropoints = 0
+def count_daily_points(achievements):
+    achievement_count = len(achievements) if achievements else 0
+    daily_points = sum(achievement.points for achievement in achievements) if achievements else 0
+    daily_retropoints = sum(achievement.retropoints for achievement in achievements) if achievements else 0
+    return achievement_count, format_points(daily_points), format_points(daily_retropoints)
 
-    # Format daily_points and daily_retropoints if they are greater than or equal to 10000
-    daily_points = format(daily_points, ',').replace(',', '.') if daily_points >= 10000 else str(daily_points)
-    daily_retropoints = format(daily_retropoints, ',').replace(',', '.') if daily_retropoints >= 10000 else str(daily_retropoints)
+def find_max_achievement(achievements):
+    return max(achievements, key=lambda achievement: (achievement.points, achievement.retropoints), default=None)
 
-    return achievement_count, daily_points, daily_retropoints
-
-def find_max_achievement(user_completion):
-    # Find the achievement with the most points, if there are multiple, the one with the highest RetroPoints is chosen
-    return (
-        max(
-            (achievements := user_completion.get_achievements()),
-            key=lambda achievement: (achievement.points, achievement.retropoints),
-        )
-        if achievements
-        else None
-    )
-
-def favorite_game(user_completion):
-    achievements = user_completion.get_achievements()
-    # Initialize an empty dictionary to store game counts, URLs, console names, points, and retropoints
+def favorite_game(achievements):
     game_counts = {}
     for achievement in achievements:
-        # If the game title is already in the dictionary, increment its count and add the points and retropoints
-        if achievement.game_title in game_counts:
-            game_counts[achievement.game_title][0] += 1
-            game_counts[achievement.game_title][3] += achievement.points
-            game_counts[achievement.game_title][4] += achievement.retropoints
-        # If the game title is not in the dictionary, add it with a count of 1, store the URL, console name, points, and retropoints
-        else:
-            game_counts[achievement.game_title] = [1, achievement.game_url, achievement.remap_console_name(), achievement.points, achievement.retropoints]
-    # Find the game with the most achievements
-    if game_counts:  # checks if the dictionary is not empty
+        game = game_counts.setdefault(achievement.game_title, [0, achievement.game_url, achievement.remap_console_name(), 0, 0])
+        game[0] += 1
+        game[3] += achievement.points
+        game[4] += achievement.retropoints
+    if game_counts:
         return extract_favorite_game(game_counts)
-    else:
-        return None, None, None, None, None, None  # Return None if the dictionary is empty
+    return None, None, None, None, None, None
 
 def extract_favorite_game(game_counts):
     favorite_game = max(game_counts, key=lambda x: game_counts[x][0])
-    fav_game_points = game_counts[favorite_game][3]
-    fav_game_retropoints = game_counts[favorite_game][4]
-    # Format fav_game_points and fav_game_retropoints if they are greater than or equal to 10000
-    fav_game_points = format(fav_game_points, ',').replace(',', '.') if fav_game_points >= 10000 else str(fav_game_points)
-    fav_game_retropoints = format(fav_game_retropoints, ',').replace(',', '.') if fav_game_retropoints >= 10000 else str(fav_game_retropoints)
-    return favorite_game, game_counts[favorite_game][0], game_counts[favorite_game][1], game_counts[favorite_game][2], fav_game_points, fav_game_retropoints
-    
+    fav_details = game_counts[favorite_game]
+    return favorite_game, fav_details[0], fav_details[1], fav_details[2], format_points(fav_details[3]), format_points(fav_details[4])
+
 def create_embed(profile, achievement_count, daily_points, daily_retropoints, max_achievement, fav_game, fav_game_achievements, fav_url, fav_console_name, fav_game_points, fav_game_retropoints):
-    # Set Embed color based on max_achievement
-    if max_achievement is not None:
-        embed_color = get_discord_color(max_achievement.badge_url)
-    else:
-        embed_color = get_discord_color(profile.profile.user_pic_unique)
-    
-    # Create a base Embed object
-    embed = discord.Embed(
-        title='',
-        description='',
-        color=embed_color
-    ).set_footer(
+    embed_color = get_discord_color(max_achievement.badge_url if max_achievement else profile.profile.user_pic_unique)
+    embed = discord.Embed(title='', description='', color=embed_color).set_footer(
         text=f"Total Points: {profile.profile.total_points_format} • Total RetroPoints: {profile.profile.total_true_points_format}",
         icon_url=profile.profile.user_pic_unique
     ).set_author(
@@ -105,12 +67,8 @@ def create_embed(profile, achievement_count, daily_points, daily_retropoints, ma
     ).set_image(
         url=DISCORD_IMAGE
     )
-
-    # Conditionally add fields based on max_achievement
-    if max_achievement is not None:
-        embed = embed.set_thumbnail(
-            url=max_achievement.badge_url
-        )
+    if max_achievement:
+        embed.set_thumbnail(url=max_achievement.badge_url)
         embed.description = (
             f"[{profile.profile.user}]({profile.profile.user_url}) has earned **{achievement_count}** achievements today.\n\n"
             f"[{fav_game}]({fav_url}) ({fav_console_name}) is the game with the most earned **({fav_game_achievements})** achievements today.\n"
@@ -121,5 +79,4 @@ def create_embed(profile, achievement_count, daily_points, daily_retropoints, ma
         )
     else:
         embed.description = 'Nothing has been earned today.'
-
     return embed
