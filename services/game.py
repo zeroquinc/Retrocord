@@ -13,14 +13,37 @@ class Game:
         Args:
             data (dict): The data dictionary containing all the game details.
         """
-        attributes = ['achievement_set_version_hash', 'ConsoleID', 'ConsoleName', 'Developer', 'Flags', 'ForumTopicID', 'Genre', 'GuideURL', 'ID', 'ImageTitle', 'IsFinal', 'ParentGameID', 'Publisher', 'Released', 'RichPresencePatch', 'Title', 'NumAchievements', 'NumAwardedToUserHardcore', 'NumDistinctPlayersHardcore', 'NumDistinctPlayersCasual', 'points_total', 'Updated', 'UserCompletionHardcore']
-        for attr in attributes:
-            setattr(self, attr.lower(), data.get(attr, "N/A"))
-        self.achievements = {achievement_data['Title']: achievement_data for achievement_data in data.get('Achievements', {}).values()}
+        self.achievement_set_version_hash = data.get('achievement_set_version_hash', "N/A")
+        self.achievements = {}
+        achievements_data = data.get('Achievements', {})
+        for id, achievement_data in achievements_data.items():
+            self.achievements[achievement_data['Title']] = achievement_data
+        self.console_id = data.get('ConsoleID', "N/A")
+        self.console_name = data.get('ConsoleName', "N/A")
+        self.developer = data.get('Developer', "N/A")
+        self.flags = data.get('Flags', "N/A")
+        self.forum_topic_id = data.get('ForumTopicID', "N/A")
+        self.genre = data.get('Genre', "N/A")
+        self.guideurl = data.get('GuideURL', "No guide available")
+        self.id = data.get('ID', "N/A")
         self.image_boxart = f"{BASE_URL}{data.get('ImageBoxArt', '')}"
         self.image_icon = f"{BASE_URL}{data.get('ImageIcon', '')}"
         self.image_ingame = f"{BASE_URL}{data.get('ImageIngame', '')}"
+        self.image_title = data.get('ImageTitle', "N/A")
+        self.isfinal = data.get('IsFinal', "N/A")
+        self.parent_game_id = data.get('ParentGameID', "N/A")
+        self.publisher = data.get('Publisher', "N/A")
+        self.released = data.get('Released', "N/A")
+        self.richpresence = data.get('RichPresencePatch', "N/A")
+        self.title = data.get('Title', "N/A")
+        self.total_achievements = data.get('NumAchievements', "N/A")
+        self.total_achievements_earned = data.get('NumAwardedToUserHardcore', "N/A")
+        self.total_players_hardcore = data.get('NumDistinctPlayersHardcore', "N/A")
+        self.total_players_softcore = data.get('NumDistinctPlayersCasual', "N/A")
+        self.total_points = data.get('points_total', "N/A")
+        self.updated = data.get('Updated', "N/A")
         self.url = f"{BASE_URL}/game/{self.id}" if self.id != "N/A" else "N/A"
+        self.user_completion_hardcore = data.get('UserCompletionHardcore', "N/A")
 
     def is_completed(self) -> bool:
         """
