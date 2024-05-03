@@ -1,6 +1,6 @@
 from config.config import BASE_URL
 from utils.achievement_utils import CONSOLE_NAME_MAP
-from utils.time_utils import calculate_time_difference, ordinal
+from utils.time_utils import calculate_time_difference
 
 class Game:
     """
@@ -10,51 +10,24 @@ class Game:
         """
         Constructs all the necessary attributes for the Game object.
 
-        Parameters
-        ----------
-        data : dict
-            The data dictionary containing all the game details.
+        Args:
+            data (dict): The data dictionary containing all the game details.
         """
-        self.achievement_set_version_hash = data.get('achievement_set_version_hash', "N/A")
-        self.achievements = {}
-        achievements_data = data.get('Achievements', {})
-        for id, achievement_data in achievements_data.items():
-            self.achievements[achievement_data['Title']] = achievement_data
-        self.console_id = data.get('ConsoleID', "N/A")
-        self.console_name = data.get('ConsoleName', "N/A")
-        self.developer = data.get('Developer', "N/A")
-        self.flags = data.get('Flags', "N/A")
-        self.forum_topic_id = data.get('ForumTopicID', "N/A")
-        self.genre = data.get('Genre', "N/A")
-        self.guideurl = data.get('GuideURL', "No guide available")
-        self.id = data.get('ID', "N/A")
+        attributes = ['achievement_set_version_hash', 'ConsoleID', 'ConsoleName', 'Developer', 'Flags', 'ForumTopicID', 'Genre', 'GuideURL', 'ID', 'ImageTitle', 'IsFinal', 'ParentGameID', 'Publisher', 'Released', 'RichPresencePatch', 'Title', 'NumAchievements', 'NumAwardedToUserHardcore', 'NumDistinctPlayersHardcore', 'NumDistinctPlayersCasual', 'points_total', 'Updated', 'UserCompletionHardcore']
+        for attr in attributes:
+            setattr(self, attr.lower(), data.get(attr, "N/A"))
+        self.achievements = {achievement_data['Title']: achievement_data for achievement_data in data.get('Achievements', {}).values()}
         self.image_boxart = f"{BASE_URL}{data.get('ImageBoxArt', '')}"
         self.image_icon = f"{BASE_URL}{data.get('ImageIcon', '')}"
         self.image_ingame = f"{BASE_URL}{data.get('ImageIngame', '')}"
-        self.image_title = data.get('ImageTitle', "N/A")
-        self.isfinal = data.get('IsFinal', "N/A")
-        self.parent_game_id = data.get('ParentGameID', "N/A")
-        self.publisher = data.get('Publisher', "N/A")
-        self.released = data.get('Released', "N/A")
-        self.richpresence = data.get('RichPresencePatch', "N/A")
-        self.title = data.get('Title', "N/A")
-        self.total_achievements = data.get('NumAchievements', "N/A")
-        self.total_achievements_earned = data.get('NumAwardedToUserHardcore', "N/A")
-        self.total_players_hardcore = data.get('NumDistinctPlayersHardcore', "N/A")
-        self.total_players_softcore = data.get('NumDistinctPlayersCasual', "N/A")
-        self.total_points = data.get('points_total', "N/A")
-        self.updated = data.get('Updated', "N/A")
         self.url = f"{BASE_URL}/game/{self.id}" if self.id != "N/A" else "N/A"
-        self.user_completion_hardcore = data.get('UserCompletionHardcore', "N/A")
 
     def is_completed(self) -> bool:
         """
         Checks if the game is completed by the user.
 
-        Returns
-        -------
-        bool
-            True if the game is completed, False otherwise.
+        Returns:
+            bool: True if the game is completed, False otherwise.
         """
         return self.user_completion_hardcore == "100.00%"
     
@@ -62,10 +35,8 @@ class Game:
         """
         Remaps the console name to its abbreviation.
 
-        Returns
-        -------
-        str
-            The abbreviation of the console name if it exists in the map, otherwise the original console name.
+        Returns:
+            str: The abbreviation of the console name if it exists in the map, otherwise the original console name.
         """
         return CONSOLE_NAME_MAP.get(self.console_name, self.console_name)
     
@@ -73,24 +44,16 @@ class Game:
         """
         Calculate the time passed between the first and last hardcore achievement earned by the user.
 
-        Returns
-        -------
-        str
-            A string representing the time passed between the first and last hardcore achievement.
+        Returns:
+            str: A string representing the time passed between the first and last hardcore achievement.
         """
-        earliest_achievement_date = None
-        latest_achievement_date = None
-        achievements_data = self.achievements.values()
-
-        for achievement_data in achievements_data:
-            if date_earned_hardcore := achievement_data.get('DateEarnedHardcore'):
-                if not earliest_achievement_date or date_earned_hardcore < earliest_achievement_date:
-                    earliest_achievement_date = date_earned_hardcore
-                if not latest_achievement_date or date_earned_hardcore > latest_achievement_date:
-                    latest_achievement_date = date_earned_hardcore
-
-        if earliest_achievement_date and latest_achievement_date:
-            return calculate_time_difference(earliest_achievement_date, latest_achievement_date)
+        if dates := [
+            achievement_data.get('DateEarnedHardcore')
+            for achievement_data in self.achievements.values()
+            if achievement_data.get('DateEarnedHardcore')
+        ]:
+            earliest, latest = min(dates), max(dates)
+            return calculate_time_difference(earliest, latest)
         else:
             return "No hardcore achievements earned"
 
@@ -98,18 +61,11 @@ class Game:
         """
         Calculates the total TrueRatio for all achievements.
 
-        Returns
-        -------
-        str
-            The total TrueRatio for all achievements, formatted with points.
+        Returns:
+            str: The total TrueRatio for all achievements, formatted with points.
         """
-        total_true_ratio = 0.0
-        for achievement_data in self.achievements.values():
-            true_ratio = achievement_data.get('TrueRatio')
-            if true_ratio is not None:
-                total_true_ratio += true_ratio
-        # Format the total as an integer with commas, then replace commas with points (cause we're cool like that)
-        return "{:,}".format(int(total_true_ratio)).replace(',', '.')
+        total_true_ratio = sum(achievement_data.get('TrueRatio', 0) for achievement_data in self.achievements.values())
+        return f"{total_true_ratio:,}".replace(',', '.')
 
 class UnlockDistribution:
     """
@@ -119,9 +75,21 @@ class UnlockDistribution:
     the total mastery count for a game, as well as how rare that overall mastery is.
     """
     def __init__(self, data):
+        """
+        Initializes the UnlockDistribution object.
+
+        Args:
+            data: The data for the UnlockDistribution object.
+        """
         self.data = data
 
     def get_highest_unlock(self):
+        """
+        Returns the highest unlock value from the data.
+
+        Returns:
+            The highest unlock value or None.
+        """
         sorted_keys = sorted(self.data, key=int, reverse=True)  # Sort keys as integers in descending order
         highest_unlock_key = next((key for key in sorted_keys if self.data[key] != 0), None)
         return self.data[highest_unlock_key] if highest_unlock_key is not None else None
