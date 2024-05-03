@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 import pytz
 
 def format_date(date: datetime) -> str:
@@ -15,6 +15,6 @@ def format_date(date: datetime) -> str:
     str
         The formatted date.
     """
-    date = date.replace(tzinfo=timezone.utc)
-    date = date.astimezone(pytz.timezone('Europe/Amsterdam'))
+    amsterdam_tz = pytz.timezone('Europe/Amsterdam')
+    date = date.astimezone(amsterdam_tz)
     return date.strftime("%d/%m/%y at %H:%M:%S")

@@ -1,49 +1,105 @@
 from loguru import logger
 import logging
 import json
+from pathlib import Path
 import sys
-import os
 
 LOG_LEVEL = 'DEBUG'
+discord_logger = None
 
-# Function to switch the logger according to the LOG_LEVEL variable
+def create_logger():
+    """
+    Creates and configures a logger with specified log level and formats for console and file logging.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        None
+    """
+    logs_path = Path('logs')
+    logs_path.mkdir(exist_ok=True)
+    log_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <level>{message}</level>" if LOG_LEVEL != 'DEBUG' else "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <red>{file}</red> | <yellow>{function}</yellow> | <level>{message}</level>"
+    logger.add(sys.stdout, level=LOG_LEVEL, colorize=True, format=log_format)
+    logger.add(logs_path / 'retrocord.log', level=LOG_LEVEL, colorize=True, format=log_format)
+
 def switch_logger():
+    """
+    Switches the logger configuration based on the log level.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        ValueError: If the log level is invalid
+    """
     logger.remove()
     if LOG_LEVEL in ['DEBUG', 'INFO']:
         create_logger()
     else:
         raise ValueError("Invalid log level")
 
-# Function to create the logger
-def create_logger():
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
-    log_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <level>{message}</level>"
-    if LOG_LEVEL == 'DEBUG':
-        log_format = "<green>{time:YYYY-MM-DD HH:mm:ss}</green> | <level>{level}</level> | <red>{file}</red> | <yellow>{function}</yellow> | <level>{message}</level>"
-    logger.add(sys.stdout, level=LOG_LEVEL, colorize=True, format=log_format)
-    logger.add('logs/retrocord.log', level=LOG_LEVEL, colorize=True, format=log_format)
-
-# Call the function to set the logger according to the LOG_LEVEL variable
-switch_logger()
-
-# Function to log JSON objects
 def log_json(json_obj, level='DEBUG'):
+    """
+    Logs a JSON object with the specified log level.
+
+    Args:
+        json_obj (dict): The JSON object to log.
+        level (str): The log level to use. Defaults to 'DEBUG'.
+
+    Returns:
+        None
+
+    Raises:
+        None
+    """
     pretty_json = json.dumps(json_obj, indent=4)
     logger.log(level, pretty_json)
 
-# Class to handle Discord's logging
+def setup_discord_logging():
+    """
+    Sets up logging for the 'discord' logger with a custom DiscordHandler.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        None
+    """
+    global discord_logger
+    discord_logger = logging.getLogger('discord')
+    discord_logger.setLevel(logging.DEBUG)
+    discord_handler = DiscordHandler()
+    discord_logger.handlers = [discord_handler]
+    discord_logger.propagate = False
+
 class DiscordHandler(logging.Handler):
+    """
+    Custom logging handler for Discord, emits log records to the logger and Discord.
+
+    Args:
+        None
+
+    Returns:
+        None
+
+    Raises:
+        None
+    """
     def emit(self, record):
         log_entry = self.format(record)
         logger.log(record.levelno, log_entry)
-        # Ensure that this handler is the only one
         if len(discord_logger.handlers) > 1:
             discord_logger.handlers = [self]
 
-# Add Discord's logging to Loguru
-discord_logger = logging.getLogger('discord')
-discord_logger.handlers = []  # Remove all handlers
-discord_logger.setLevel(logging.DEBUG)
-discord_logger.addHandler(DiscordHandler())
-discord_logger.propagate = False  # Disable propagation
+switch_logger()
+setup_discord_logging()
