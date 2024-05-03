@@ -1,7 +1,8 @@
-name: Label PRs based on commit messages!
+name: Label PRs based on PR title
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
   labelPR:
@@ -17,24 +18,19 @@ jobs:
 
       - name: Get PR number
         id: pr_number
-        run: |
-          PR_NUMBER=$(gh pr list --json number,headRefName --jq ".[] | select(.headRefName == \"${{ github.ref }}\") | .number")
-          echo "::set-output name=number::$PR_NUMBER"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: echo "::set-output name=number::${{ github.event.pull_request.number }}"
 
       - name: Add label
         run: |
-          COMMIT_MSG=$(git log --format=%B -n 1 ${{ github.sha }})
-          if [[ "$COMMIT_MSG" == fix:* ]]; then
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          if [[ "$PR_TITLE" == fix:* ]]; then
             gh pr edit ${{ steps.pr_number.outputs.number }} --add-label "fix"
-          elif [[ "$COMMIT_MSG" == feature:* ]]; then
+          elif [[ "$PR_TITLE" == feature:* ]]; then
             gh pr edit ${{ steps.pr_number.outputs.number }} --add-label "feature"
-          elif [[ "$COMMIT_MSG" == chore:* ]]; then
+          elif [[ "$PR_TITLE" == chore:* ]]; then
             gh pr edit ${{ steps.pr_number.outputs.number }} --add-label "chore"
-          elif [[ "$COMMIT_MSG" == enhancement:* ]]; then
+          elif [[ "$PR_TITLE" == enhancement:* ]]; then
             gh pr edit ${{ steps.pr_number.outputs.number }} --add-label "enhancement"
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        if: steps.pr_number.outputs.number != ''
