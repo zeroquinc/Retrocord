@@ -1,11 +1,19 @@
 from config.config import BASE_URL
 import time
-import locale
-
-locale.setlocale(locale.LC_ALL, 'nl_NL')
 
 class Profile:
+    """
+    A class to represent a Profile.
+    """
+
     def __init__(self, data: dict):
+        """
+        Constructs all the necessary attributes for the Game object.
+        Parameters
+        ----------
+        data : dict
+            The data dictionary containing all the game details.
+        """
         self.user = data.get('User', "N/A")
         self.user_pic = f"{BASE_URL}{data.get('UserPic', '')}"
         self.user_pic_unique = f"{self.user_pic}?timestamp={int(time.time())}"
@@ -28,4 +36,15 @@ class Profile:
         self.motto = data.get('Motto', "N/A")
 
     def format_points(self, points: int) -> str:
-        return locale.format_string("%d", points, grouping=True).replace(',', '.') if points >= 10000 else str(points)
+        """
+        Formats the points with commas as thousands separators.
+        Parameters
+        ----------
+        points : int
+            The points to be formatted.
+        Returns
+        -------
+        str
+            The formatted points.
+        """
+        return format(points, ',').replace(',', '.') if points >= 10000 else str(points)
