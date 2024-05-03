@@ -2,14 +2,13 @@ import pytz
 from datetime import datetime, timedelta
 from config.config import RETROACHIEVEMENTS_INTERVAL, TROPHIES_INTERVAL, PRESENCE_INTERVAL
 
-"""
-A function to get the epoch time of yesterday and now in the Europe/Amsterdam timezone.
-
-Returns:
-Tuple of two integers representing the epoch time of yesterday and now.
-"""
-
 def get_now_and_yesterday_epoch():
+    """
+    A function to get the epoch time of yesterday and now in the Europe/Amsterdam timezone.
+
+    Returns:
+    Tuple of two integers representing the epoch time of yesterday and now.
+    """
     now_utc = datetime.now(pytz.utc)
     amsterdam_tz = pytz.timezone('Europe/Amsterdam')
     now_amsterdam = now_utc.astimezone(amsterdam_tz)
@@ -19,17 +18,16 @@ def get_now_and_yesterday_epoch():
 
     return yesterday_epoch, now_epoch
 
-"""
-A function to calculate the delay to start the task until the next interval.
-
-Args:
-- interval_type: Type of interval ('retro', 'trophies', or other).
-
-Returns:
-Integer representing the delay in seconds until the next interval.
-"""
-
 def delay_until_next_interval(interval_type):
+    """
+    A function to calculate the delay to start the task until the next interval.
+
+    Args:
+    - interval_type: Type of interval ('retro', 'trophies', or other).
+
+    Returns:
+    Integer representing the delay in seconds until the next interval.
+    """
     now = datetime.now()
     if interval_type == 'retro':
         interval = RETROACHIEVEMENTS_INTERVAL
@@ -47,31 +45,29 @@ def delay_until_next_interval(interval_type):
     delta_s = (future - now).total_seconds()
     return round(delta_s)
 
-"""
-A function to calculate the delay until the next midnight.
-
-Returns:
-Integer representing the delay in seconds until the next midnight.
-"""
-
 def delay_until_next_midnight():
+    """
+    A function to calculate the delay until the next midnight.
+
+    Returns:
+    Integer representing the delay in seconds until the next midnight.
+    """
     now = datetime.now()
     next_midnight = datetime.combine(now + timedelta(days=1), datetime.min.time())
     seconds_until = (next_midnight - now).total_seconds()
     return round(seconds_until)
 
-"""
-A function to calculate the time difference between two dates.
-
-Args:
-- earliest_date_str: String representing the earliest date.
-- latest_date_str: String representing the latest date.
-
-Returns:
-String representing the time difference in a human-readable format.
-"""
-
 def calculate_time_difference(earliest_date_str: str, latest_date_str: str) -> str:
+    """
+    A function to calculate the time difference between two dates.
+
+    Args:
+    - earliest_date_str: String representing the earliest date.
+    - latest_date_str: String representing the latest date.
+
+    Returns:
+    String representing the time difference in a human-readable format.
+    """
     format_str = '%Y-%m-%d %H:%M:%S'
     earliest_date = datetime.strptime(earliest_date_str, format_str)
     latest_date = datetime.strptime(latest_date_str, format_str)
@@ -108,17 +104,16 @@ def format_time_units(years, months, days, hours, minutes):
     
     return time_units
     
-"""
-A function to get the ordinal suffix of a number.
-
-Args:
-- n: Number for which the ordinal suffix is to be determined.
-
-Returns:
-String representing the number with its ordinal suffix.
-"""
-    
 def ordinal(n):
+    """
+    A function to get the ordinal suffix of a number.
+
+    Args:
+    - n: Number for which the ordinal suffix is to be determined.
+
+    Returns:
+    String representing the number with its ordinal suffix.
+    """
     suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n % 10, 4)]
     if 11 <= (n % 100) <= 13:
         suffix = 'th'
