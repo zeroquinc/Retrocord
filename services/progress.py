@@ -1,8 +1,6 @@
 from datetime import datetime
 import pytz
 
-from utils.time_utils import ordinal
-
 class Progress:
     """
     Represents progress data with count, total, and results.
@@ -28,8 +26,13 @@ class Progress:
         return f"""Count: {self.count}, Total: {self.total}, Results: [{results_str}]"""
 
     def count_mastered(self):
-        count = len([result for result in self.results if result.highest_award_kind == 'mastered'])
-        return ordinal(count)
+        return len(
+            [
+                result
+                for result in self.results
+                if result.highest_award_kind == 'mastered'
+            ]
+        )
 
 class Result:
     """
