@@ -21,7 +21,7 @@ def get_discord_color(image_url, num_colors=5, crop_percentage=0.5):
     """
     response = requests.get(image_url)
     img = Image.open(BytesIO(response.content))
-    
+
     # Calculate the crop dimensions
     width, height = img.size
     crop_width = int(width * crop_percentage)
@@ -30,10 +30,12 @@ def get_discord_color(image_url, num_colors=5, crop_percentage=0.5):
     top = (height - crop_height) // 2
     right = left + crop_width
     bottom = top + crop_height
-    
+
     img = img.crop((left, top, right, bottom))
 
     img = img.resize((img.width // 2, img.height // 2))  # Resize for faster processing
+
+    img = img.convert("RGB")  # Ensure the image is in RGB format
 
     img_array = np.array(img)
     img_flattened = img_array.reshape(-1, 3)
