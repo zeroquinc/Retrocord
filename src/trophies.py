@@ -11,7 +11,7 @@ from utils.custom_logger import logger
 psnawp = PSNAWP(PSNTOKEN)
 
 def get_client():
-    logger.debug("Making API call to get_profile_legacy")
+    logger.debug("Calling Sony API for profile information.")
     client = psnawp.me()
     profile_legacy = client.get_profile_legacy()
     profile_picture_url = profile_legacy['profile']['personalDetail']['profilePictureUrls'][0]['profilePictureUrl']
@@ -22,15 +22,17 @@ def get_current_time():
     return datetime.now(timezone.utc)
 
 def get_recent_titles(client, minutes=TROPHIES_INTERVAL):
-    logger.debug("Making API call to title_stats")
+    logger.info("Calling Sony API to get recently played games")
     now = get_current_time()
     titles = list(client.title_stats())
     title_ids = [title.title_id for title in titles if title.last_played_date_time > now - timedelta(minutes=minutes)]
-    logger.debug(f"Returning title IDs: {title_ids}")
+    for title in titles:
+        if title.title_id in title_ids:
+            logger.debug(f"Found a recently played game: {title.name}")
     return title_ids
 
 def get_earned_trophies(client, title_ids):
-    logger.debug("Making API call to trophy_titles_for_title")
+    logger.debug("Calling Sony API to get earned trophies.")
     trophies = []
     for trophy_title in client.trophy_titles_for_title(title_ids=title_ids):
         earned_trophies = client.trophies(np_communication_id=trophy_title.np_communication_id, platform='all', trophy_group_id='all', include_metadata=True)
@@ -51,35 +53,33 @@ def create_trophy_embed(trophy, trophy_title, client, current, total_trophies):
     embed.set_author(name=f"A {trophy.trophy_type.name.lower().capitalize()} Trophy Unlocked", icon_url=trophy_title.title_icon_url)
     return embed
 
-async def process_trophies_embeds(client, title_ids):
+async def process_trophies_embeds(client, title_ids, TROPHIES_INTERVAL):
     trophy_embeds = []
-
     # Get all trophies for the provided title_ids
     all_trophies = get_earned_trophies(client, title_ids)
-    
     # Filter out trophies with None earned date
     earned_trophies = [t for t in all_trophies if t[0].earned_date_time is not None]
-
     # Sort earned trophies by earned date
     earned_trophies.sort(key=lambda x: x[0].earned_date_time)
-
     # Calculate total trophies of the game (before filtering for earned_date_time)
     total_trophies = len(all_trophies)
-
+    # Get current time and calculate cutoff time
+    now = get_current_time()
+    cutoff = now - timedelta(minutes=TROPHIES_INTERVAL)
+    # Filter out trophies that were earned before the cutoff time
+    earned_trophies = [t for t in earned_trophies if t[0].earned_date_time >= cutoff]
     # Calculate total trophies earned (after filtering)
     total_trophies_earned = len(earned_trophies)
-
     for i, (trophy, trophy_title) in enumerate(earned_trophies):
         # Pass total_trophies to create_trophy_embed function
         embed = create_trophy_embed(trophy, trophy_title, client, i + 1, total_trophies)
         trophy_embeds.append((trophy.earned_date_time, embed))
-
     return trophy_embeds, total_trophies_earned
 
 async def process_trophies(trophies_channel):
     client = get_client()
     if title_ids := get_recent_titles(client):
-        trophy_embeds = await process_trophies_embeds(client, title_ids)
+        trophy_embeds, _ = await process_trophies_embeds(client, title_ids, TROPHIES_INTERVAL)
         # Filter out trophy embeds with None earned date before sorting
         trophy_embeds = [te for te in trophy_embeds if te[0] is not None]
         trophy_embeds.sort(key=lambda x: x[0])  # Sort embeds by trophy earned date
