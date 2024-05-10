@@ -40,16 +40,18 @@ def get_earned_trophies(client, title_ids):
             try:
                 earned_trophies = client.trophies(np_communication_id=trophy_title.np_communication_id, platform=platform, trophy_group_id='all', include_metadata=True)
                 # Add each trophy and its title to the list
-                trophies.extend((trophy, trophy_title) for trophy in earned_trophies)
+                trophies.extend((trophy, {'trophy_title': trophy_title, 'platform': platform}) for trophy in earned_trophies)
             except Exception as e:
                 logger.error(f"Failed to get trophies for platform {platform}: {e}")
     return trophies
 
-def create_trophy_embed(trophy, trophy_title, client, current, total_trophies):
+def create_trophy_embed(trophy, trophy_title_info, client, current, total_trophies):
+    trophy_title = trophy_title_info['trophy_title']
+    platform = trophy_title_info['platform']
     most_common_color = get_discord_color(trophy.trophy_icon_url)
     completion = current
     percentage = (completion / total_trophies) * 100
-    embed = discord.Embed(description=f"**{trophy_title.title_name}** \n\n {trophy.trophy_detail} \n\n Unlocked by {trophy.trophy_earn_rate}% of players", color=most_common_color)
+    embed = discord.Embed(description=f"**{trophy_title.title_name} ({platform})** \n\n {trophy.trophy_detail} \n\n Unlocked by {trophy.trophy_earn_rate}% of players", color=most_common_color)
     embed.add_field(name="Trophy", value=f"[{trophy.trophy_name}]({trophy.trophy_icon_url})", inline=True)
     embed.add_field(name="Completion", value=f"{completion}/{total_trophies} ({percentage:.2f}%)", inline=True)
     embed.set_image(url=DISCORD_IMAGE)
