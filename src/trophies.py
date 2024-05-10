@@ -62,28 +62,31 @@ def create_trophy_embed(trophy, trophy_title_info, client, current, total_trophi
 
 async def process_trophies_embeds(client, title_ids, TROPHIES_INTERVAL):
     trophy_embeds = []
-    # Get all trophies for the provided title_ids
-    all_trophies = get_earned_trophies(client, title_ids)
-    # Filter out trophies with None earned date
-    earned_trophies = [t for t in all_trophies if t[0].earned_date_time is not None]
-    logger.debug(f"Found {len(earned_trophies)} earned trophies.")
-    # Sort earned trophies by earned date
-    earned_trophies.sort(key=lambda x: x[0].earned_date_time)
-    # Calculate total trophies of the game (before filtering for earned_date_time)
-    total_trophies = len(all_trophies)
-    # Get current time and calculate cutoff time
-    now = get_current_time()
-    cutoff = now - timedelta(minutes=TROPHIES_INTERVAL)
-    # Filter out trophies that were earned before the cutoff time
-    recent_trophies = [t for t in earned_trophies if t[0].earned_date_time >= cutoff]
-    # Calculate total trophies earned (after filtering)
-    total_trophies_earned = len(earned_trophies)
-    # Calculate the starting count
-    starting_count = total_trophies_earned - len(recent_trophies)
-    for i, (trophy, trophy_title) in enumerate(recent_trophies):
-        # Pass total_trophies to create_trophy_embed function
-        embed = create_trophy_embed(trophy, trophy_title, client, starting_count + i + 1, total_trophies)
-        trophy_embeds.append((trophy.earned_date_time, embed))
+    for title_id, platform in title_ids:
+        # Get all trophies for the current title_id
+        all_trophies = get_earned_trophies(client, [(title_id, platform)])
+        # Filter out trophies with None earned date
+        earned_trophies = [t for t in all_trophies if t[0].earned_date_time is not None]
+        # Get the game name from the first trophy_title object
+        game_name = all_trophies[0][1]['trophy_title'].title_name if all_trophies else "Unknown"
+        logger.debug(f"Found {len(earned_trophies)} earned trophies for game {game_name}")
+        # Sort earned trophies by earned date
+        earned_trophies.sort(key=lambda x: x[0].earned_date_time)
+        # Calculate total trophies of the game (before filtering for earned_date_time)
+        total_trophies = len(all_trophies)
+        # Get current time and calculate cutoff time
+        now = get_current_time()
+        cutoff = now - timedelta(minutes=TROPHIES_INTERVAL)
+        # Filter out trophies that were earned before the cutoff time
+        recent_trophies = [t for t in earned_trophies if t[0].earned_date_time >= cutoff]
+        # Calculate total trophies earned (after filtering)
+        total_trophies_earned = len(earned_trophies)
+        # Calculate the starting count
+        starting_count = total_trophies_earned - len(recent_trophies)
+        for i, (trophy, trophy_title) in enumerate(recent_trophies):
+            # Pass total_trophies to create_trophy_embed function
+            embed = create_trophy_embed(trophy, trophy_title, client, starting_count + i + 1, total_trophies)
+            trophy_embeds.append((trophy.earned_date_time, embed))
     return trophy_embeds, len(recent_trophies)
 
 async def process_trophies(trophies_channel):
