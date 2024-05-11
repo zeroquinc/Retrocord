@@ -75,10 +75,13 @@ async def process_trophies_embeds(client, title_ids, TROPHIES_INTERVAL):
         # Calculate total trophies of the game (before filtering for earned_date_time)
         total_trophies = len(all_trophies)
         # Get current time and calculate cutoff time
+        logger.debug(f"Earned trophies before sorting: {earned_trophies}")
         now = get_current_time()
+        logger.debug(f"Current time: {now}")
         cutoff = now - timedelta(minutes=TROPHIES_INTERVAL)
-        # Filter out trophies that were earned before the cutoff time
+        logger.debug(f"Cutoff time: {cutoff}")
         recent_trophies = [t for t in earned_trophies if t[0].earned_date_time >= cutoff]
+        logger.debug(f"Recent trophies after filtering: {recent_trophies}")
         # Calculate total trophies earned (after filtering)
         total_trophies_earned = len(earned_trophies)
         # Calculate the starting count
