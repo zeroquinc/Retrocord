@@ -1,9 +1,9 @@
 import discord
 from datetime import datetime, timedelta, timezone
 from psnawp_api import PSNAWP
-import pytz
 
 from utils.image_utils import get_discord_color
+from utils.trophy_utils import format_title
 from utils.date_utils import format_date
 from config.config import PSNTOKEN, DISCORD_IMAGE, TROPHIES_INTERVAL
 
@@ -48,17 +48,19 @@ def get_earned_trophies(client, title_ids):
 
 def create_trophy_embed(trophy, trophy_title_info, client, current, total_trophies):
     trophy_title = trophy_title_info['trophy_title']
+    game_url = format_title(trophy_title.title_name)  # format the title name into a URL
     platform = trophy_title_info['platform']
     most_common_color = get_discord_color(trophy.trophy_icon_url)
     completion = current
     percentage = (completion / total_trophies) * 100
-    embed = discord.Embed(description=f"**{trophy_title.title_name} ({platform})** \n\n {trophy.trophy_detail} \n\n Unlocked by {trophy.trophy_earn_rate}% of players", color=most_common_color)
+    embed = discord.Embed(description=f"**[{trophy_title.title_name}]({game_url}) ({platform})** \n\n {trophy.trophy_detail} \n\n Unlocked by {trophy.trophy_earn_rate}% of players", color=most_common_color)
     embed.add_field(name="Trophy", value=f"[{trophy.trophy_name}]({trophy.trophy_icon_url})", inline=True)
+    embed.add_field(name="Rarity", value=f"{trophy.trophy_type.name.lower().capitalize()}")
     embed.add_field(name="Completion", value=f"{completion}/{total_trophies} ({percentage:.2f}%)", inline=True)
     embed.set_image(url=DISCORD_IMAGE)
     embed.set_thumbnail(url=trophy.trophy_icon_url)
     embed.set_footer(text=f"{client.online_id} • Earned on {format_date(trophy.earned_date_time)}", icon_url=client.profile_picture_url)
-    embed.set_author(name=f"A {trophy.trophy_type.name.lower().capitalize()} Trophy Unlocked", icon_url=trophy_title.title_icon_url)
+    embed.set_author(name="A Trophy Unlocked", icon_url=trophy_title.title_icon_url)
     return embed
 
 async def process_trophies_embeds(client, title_ids, TROPHIES_INTERVAL):
@@ -76,7 +78,6 @@ async def process_trophies_embeds(client, title_ids, TROPHIES_INTERVAL):
         # Calculate total trophies of the game (before filtering for earned_date_time)
         total_trophies = len(all_trophies)
         # Get current time and calculate cutoff time
-        logger.debug(f"Earned trophies before sorting: {earned_trophies}")
         now = get_current_time()
         logger.debug(f"Current time: {now}")
         cutoff = now - timedelta(minutes=TROPHIES_INTERVAL)
