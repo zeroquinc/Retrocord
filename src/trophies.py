@@ -1,6 +1,7 @@
 import discord
 from datetime import datetime, timedelta, timezone
 from psnawp_api import PSNAWP
+import pytz
 
 from utils.image_utils import get_discord_color
 from utils.date_utils import format_date
@@ -21,11 +22,11 @@ def get_client():
 def get_current_time():
     return datetime.now(timezone.utc)
 
-def get_recent_titles(client, minutes=TROPHIES_INTERVAL):
+def get_recent_titles(client, hours=24): # Use 24 hours because Sony's API is not updating the last_played_date_time very often
     logger.info("Calling Sony API to get recently played games")
     now = get_current_time()
     titles = list(client.title_stats())
-    title_ids = [(title.title_id, 'PS5' if 'ps5' in title.category.value else 'PS4') for title in titles if title.last_played_date_time > now - timedelta(minutes=minutes)]
+    title_ids = [(title.title_id, 'PS5' if 'ps5' in title.category.value else 'PS4') for title in titles if title.last_played_date_time > now - timedelta(hours=hours)]
     logger.debug(f"API response: {titles}")
     for title in titles:
         if title.title_id in [id_ for id_, platform in title_ids]:
