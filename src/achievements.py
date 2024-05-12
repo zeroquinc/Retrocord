@@ -2,8 +2,8 @@ import discord
 from datetime import datetime
 
 from services.api import UserProgressGameInfo, UserCompletionRecent, UserProfile, UserCompletionProgress, GameUnlocks
-from utils.image_utils import get_discord_color
-from utils.time_utils import ordinal
+from utils.image import get_discord_color
+from utils.datetime import ordinal
 from config.config import api_key, api_username, DISCORD_IMAGE
 
 from utils.custom_logger import logger

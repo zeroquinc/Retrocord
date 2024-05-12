@@ -1,6 +1,6 @@
 import pytz
 from datetime import datetime, timedelta
-from config.config import RETROACHIEVEMENTS_INTERVAL, TROPHIES_INTERVAL, PRESENCE_INTERVAL
+from config.config import RETROACHIEVEMENTS_INTERVAL, PRESENCE_INTERVAL
 
 def get_now_and_yesterday_epoch():
     """
@@ -23,7 +23,7 @@ def delay_until_next_interval(interval_type):
     A function to calculate the delay to start the task until the next interval.
 
     Args:
-    - interval_type: Type of interval ('retro', 'trophies', or other).
+    - interval_type: Type of interval ('retro' or other).
 
     Returns:
     Integer representing the delay in seconds until the next interval.
@@ -31,8 +31,6 @@ def delay_until_next_interval(interval_type):
     now = datetime.now()
     if interval_type == 'retro':
         interval = RETROACHIEVEMENTS_INTERVAL
-    elif interval_type == 'trophies':
-        interval = TROPHIES_INTERVAL
     else:
         interval = PRESENCE_INTERVAL
     minutes = (now.minute // interval + 1) * interval
@@ -56,6 +54,36 @@ def delay_until_next_midnight():
     next_midnight = datetime.combine(now + timedelta(days=1), datetime.min.time())
     seconds_until = (next_midnight - now).total_seconds()
     return round(seconds_until)
+
+def format_time_units(years, months, days, hours, minutes):
+    time_units = []
+    if years > 0:
+        time_units.append(f"{years} year{'s' if years > 1 else ''}")
+    if months > 0:
+        time_units.append(f"{months} month{'s' if months > 1 else ''}")
+    if days > 0:
+        time_units.append(f"{days} day{'s' if days > 1 else ''}")
+    if hours > 0:
+        time_units.append(f"{hours} hour{'s' if hours > 1 else ''}")
+    if minutes > 0:
+        time_units.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
+    
+    return time_units
+    
+def ordinal(n):
+    """
+    A function to get the ordinal suffix of a number.
+
+    Args:
+    - n: Number for which the ordinal suffix is to be determined.
+
+    Returns:
+    String representing the number with its ordinal suffix.
+    """
+    suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n % 10, 4)]
+    if 11 <= (n % 100) <= 13:
+        suffix = 'th'
+    return str(n) + suffix
 
 def calculate_time_difference(earliest_date_str: str, latest_date_str: str) -> str:
     """
@@ -88,33 +116,3 @@ def calculate_time_difference(earliest_date_str: str, latest_date_str: str) -> s
         return time_units[0]
     else:
         return '0 minutes'
-
-def format_time_units(years, months, days, hours, minutes):
-    time_units = []
-    if years > 0:
-        time_units.append(f"{years} year{'s' if years > 1 else ''}")
-    if months > 0:
-        time_units.append(f"{months} month{'s' if months > 1 else ''}")
-    if days > 0:
-        time_units.append(f"{days} day{'s' if days > 1 else ''}")
-    if hours > 0:
-        time_units.append(f"{hours} hour{'s' if hours > 1 else ''}")
-    if minutes > 0:
-        time_units.append(f"{minutes} minute{'s' if minutes > 1 else ''}")
-    
-    return time_units
-    
-def ordinal(n):
-    """
-    A function to get the ordinal suffix of a number.
-
-    Args:
-    - n: Number for which the ordinal suffix is to be determined.
-
-    Returns:
-    String representing the number with its ordinal suffix.
-    """
-    suffix = ['th', 'st', 'nd', 'rd', 'th'][min(n % 10, 4)]
-    if 11 <= (n % 100) <= 13:
-        suffix = 'th'
-    return str(n) + suffix

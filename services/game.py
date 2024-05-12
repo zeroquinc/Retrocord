@@ -1,6 +1,6 @@
 from config.config import BASE_URL
-from utils.achievement_utils import CONSOLE_NAME_MAP
-from utils.time_utils import calculate_time_difference
+from utils.achievement import CONSOLE_NAME_MAP
+from utils.datetime import calculate_time_difference
 
 class Game:
     """

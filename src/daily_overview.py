@@ -1,8 +1,8 @@
 import discord
 
 from services.api import UserCompletionByDate, UserProfile
-from utils.image_utils import get_discord_color
-from utils.time_utils import get_now_and_yesterday_epoch
+from utils.image import get_discord_color
+from utils.datetime import get_now_and_yesterday_epoch
 from config.config import DISCORD_IMAGE, RETRO_DAILY_IMAGE
 from utils.custom_logger import logger
 
