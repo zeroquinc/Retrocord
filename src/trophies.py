@@ -73,7 +73,7 @@ def create_platinum_embed(trophy, trophy_title_info, client, formatted_time_diff
     embed.set_image(url=DISCORD_IMAGE)
     embed.set_thumbnail(url=trophy_title.title_icon_url)
     embed.set_footer(text=f"{client.online_id} • Platinum achieved on {format_date(trophy.earned_date_time)}", icon_url=client.profile_picture_url)
-    embed.set_author(name="A New Platinum", icon_url=trophy_title.title_icon_url)
+    embed.set_author(name="Platinum Unlocked", icon_url=trophy_title.title_icon_url)
     return embed
 
 async def process_trophies_embeds(client, title_ids, TROPHIES_INTERVAL):
