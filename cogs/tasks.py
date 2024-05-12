@@ -5,7 +5,7 @@ from src.daily_overview import process_daily_overview
 from src.trophies import process_trophies
 from src.presence import process_presence
 from utils.time_utils import delay_until_next_interval, delay_until_next_midnight
-from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID, MASTERY_CHANNEL_ID, TROPHIES_CHANNEL_ID, RETROACHIEVEMENTS_INTERVAL, PRESENCE_INTERVAL, TROPHIES_INTERVAL, TASK_START_DELAY
+from config.config import users, api_key, api_username, ACHIEVEMENTS_CHANNEL_ID, DAILY_OVERVIEW_CHANNEL_ID, MASTERY_CHANNEL_ID, TROPHIES_CHANNEL_ID, PLATINUM_CHANNEL_ID, RETROACHIEVEMENTS_INTERVAL, PRESENCE_INTERVAL, TROPHIES_INTERVAL, TASK_START_DELAY
 from utils.custom_logger import logger
 
 class TasksCog(commands.Cog):
@@ -24,8 +24,9 @@ class TasksCog(commands.Cog):
     @tasks.loop(minutes=TROPHIES_INTERVAL)
     async def process_trophies(self):
         trophies_channel = self.bot.get_channel(TROPHIES_CHANNEL_ID)
+        platinum_channel = self.bot.get_channel(PLATINUM_CHANNEL_ID)
         try:
-            await process_trophies(trophies_channel)
+            await process_trophies(trophies_channel, platinum_channel)
         except Exception as e:
             logger.error(f'Error processing trophies: {e}')
 
