@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from psnawp_api import PSNAWP
 
 from utils.image_utils import get_discord_color
-from utils.trophy_utils import format_title
+from utils.trophy_utils import format_title, calculate_total_time
 from utils.date_utils import format_date
 from config.config import PSNTOKEN, DISCORD_IMAGE, TROPHIES_INTERVAL
 
@@ -63,16 +63,16 @@ def create_trophy_embed(trophy, trophy_title_info, client, current, total_trophi
     embed.set_author(name="A Trophy Unlocked", icon_url=trophy_title.title_icon_url)
     return embed
 
-def create_platinum_embed(trophy, trophy_title_info, client):
+def create_platinum_embed(trophy, trophy_title_info, client, formatted_time_diff):
     trophy_title = trophy_title_info['trophy_title']
     game_url = format_title(trophy_title.title_name)  # format the title name into a URL
     platform = trophy_title_info['platform']
     most_common_color = get_discord_color(trophy_title.title_icon_url)
-    embed = discord.Embed(description=f"**[{trophy_title.title_name}]({game_url}) ({platform})**\n\n {client.online_id} has achieved the Platinum trophy of the game! \n\n{trophy_title.title_name} has {trophy_title.defined_trophies['bronze']} Bronze, {trophy_title.defined_trophies['silver']} Silver, {trophy_title.defined_trophies['gold']} Gold, and {trophy_title.defined_trophies['platinum']} Platinum trophy.\n\n The Platinum has been achieved by {trophy.trophy_earn_rate}% of players", color=most_common_color)
+    embed = discord.Embed(description=f"**[{trophy_title.title_name}]({game_url}) ({platform})**\n\n Achieved in {formatted_time_diff} \n\n{trophy_title.title_name} has {trophy_title.defined_trophies['bronze']} Bronze, {trophy_title.defined_trophies['silver']} Silver, {trophy_title.defined_trophies['gold']} Gold, and {trophy_title.defined_trophies['platinum']} Platinum trophy\n\n The Platinum has been achieved by {trophy.trophy_earn_rate}% of players", color=most_common_color)
     embed.add_field(name="Trophy", value=f"[{trophy.trophy_name}]({trophy.trophy_icon_url})", inline=True)
     embed.set_image(url=DISCORD_IMAGE)
     embed.set_thumbnail(url=trophy_title.title_icon_url)
-    embed.set_footer(text=f"{client.online_id} • Earned on {format_date(trophy.earned_date_time)}", icon_url=client.profile_picture_url)
+    embed.set_footer(text=f"{client.online_id} • Platinum achieved on {format_date(trophy.earned_date_time)}", icon_url=client.profile_picture_url)
     embed.set_author(name="A New Platinum", icon_url=trophy_title.title_icon_url)
     return embed
 
@@ -107,7 +107,15 @@ async def process_trophies_embeds(client, title_ids, TROPHIES_INTERVAL):
             embed = create_trophy_embed(trophy, trophy_title, client, starting_count + i + 1, total_trophies)
             trophy_embeds.append((trophy.earned_date_time, embed))
             if trophy.trophy_type.name.lower() == 'platinum':
-                embed = create_platinum_embed(trophy, trophy_title, client)
+                # Get the oldest and newest trophy
+                oldest_trophy = earned_trophies[0]
+                newest_trophy = earned_trophies[-1]
+                # Calculate the time difference
+                time_diff = newest_trophy[0].earned_date_time - oldest_trophy[0].earned_date_time
+                # Format the time difference
+                formatted_time_diff = calculate_total_time(time_diff)
+                # Pass formatted_time_diff to create_platinum_embed function
+                embed = create_platinum_embed(trophy, trophy_title, client, formatted_time_diff)
                 platinum_embeds.append((trophy.earned_date_time, embed))
     return trophy_embeds, len(recent_trophies), platinum_embeds
 
