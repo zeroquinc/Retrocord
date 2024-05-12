@@ -1,7 +1,7 @@
 from config.config import BASE_URL
 from datetime import datetime
 import pytz
-from utils.achievement_utils import CONSOLE_NAME_MAP
+from utils.achievement import CONSOLE_NAME_MAP
 
 class Achievement:
     """
