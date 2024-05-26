@@ -17,12 +17,13 @@ async def process_daily_overview(users, api_username, api_key, channel):
             user_completion = UserCompletionByDate(user, api_username, api_key, yesterday, now)
             profile = UserProfile(user, api_username, api_key)
             achievements = user_completion.get_achievements()
-            achievement_count, daily_points, daily_retropoints = count_daily_points(achievements)
-            max_achievement = find_max_achievement(achievements)
-            fav_game_details = favorite_game(achievements)
-            logger.info(f"{user} has earned {achievement_count} achievements today, totaling {daily_points} points and {daily_retropoints} RetroPoints. Their favorite game is {fav_game_details[0]} with {fav_game_details[1]} achievements.")
-            embed = create_embed(profile, achievement_count, daily_points, daily_retropoints, max_achievement, *fav_game_details)
-            all_embeds.append(embed)
+            if achievements:  # Only process if there are achievements
+                achievement_count, daily_points, daily_retropoints = count_daily_points(achievements)
+                max_achievement = find_max_achievement(achievements)
+                fav_game_details = favorite_game(achievements)
+                logger.info(f"{user} has earned {achievement_count} achievements today, totaling {daily_points} points and {daily_retropoints} RetroPoints. Their favorite game is {fav_game_details[0]} with {fav_game_details[1]} achievements.")
+                embed = create_embed(profile, achievement_count, daily_points, daily_retropoints, max_achievement, *fav_game_details)
+                all_embeds.append(embed)
         except Exception as e:
             logger.error(f'Error processing user {user}: {e}')
 
