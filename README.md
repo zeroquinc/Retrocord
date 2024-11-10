@@ -40,4 +40,5 @@ To get started with Retrocord, follow these steps:
 2. Navigate to the project directory
 3. Install the dependecies with `pip install -r requirements.txt`
 4. Navigate to `/config/`, rename `config_example.py` to `config.py` and fill in the variables
-5. Run the bot: `python3 bot.py &`
+5. Rename `emoji_example.json` to `emoji.json`, upload console icons as emoji in your Discord server, and fill in their ID's in `emoji.json`. It's important to keep the naming scheme, so upload the `gbc` emoji as `gbc` in Discord.
+6. Run the bot: `python3 bot.py &`
