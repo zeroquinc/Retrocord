@@ -134,8 +134,8 @@ def create_achievement_embed(game, user, achievement, profile, current, total):
             f"**[{achievement.game_title}]({achievement.game_url})** "
             f"{emoji}\n\n"
             f"{achievement.description}\n\n"
-            f"Unlocked by {game.achievements[achievement.title]['NumAwardedHardcore']} out of "
-            f"{game.total_players_hardcore} players ({unlock_percentage:.2f}%)"
+            f"Unlocked by **{game.achievements[achievement.title]['NumAwardedHardcore']}** out of "
+            f"**{game.total_players_hardcore}** players (**{unlock_percentage:.2f}%**)"
         ),
         color=most_common_color
     )
@@ -148,8 +148,8 @@ def create_achievement_embed(game, user, achievement, profile, current, total):
     )
 
     embed.add_field(name="Achievement", value=achievement_title, inline=True)
-    embed.add_field(name="Points", value=f"{achievement.points} ({achievement.retropoints_format})", inline=True)
-    embed.add_field(name="Completion", value=f"{completion}/{game.total_achievements} ({percentage:.2f}%)", inline=True)
+    embed.add_field(name="Points", value=f"**{achievement.points}** ({achievement.retropoints_format})", inline=True)
+    embed.add_field(name="Completion", value=f"{completion}/{game.total_achievements} (**{percentage:.2f}%**)", inline=True)
     embed.set_image(url=DISCORD_IMAGE)
     embed.set_thumbnail(url=achievement.badge_url)
     embed.set_footer(text=f"{user} • Unlocked on {achievement.date_amsterdam}", icon_url=profile.profile.user_pic_unique)
@@ -158,11 +158,35 @@ def create_achievement_embed(game, user, achievement, profile, current, total):
 
 def create_mastery_embed(game, user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage):
     most_common_color = get_discord_color(game.image_icon)
-    embed = discord.Embed(description=f"**[{game.title}]({game.url})** ({game.remap_console_name()}) \n\nThis is [{user}]({profile.profile.user_url})'s **{mastered_count}** mastery!\n\nMastered in {mastery_time}\n\nMastered by {highest_unlock} out of {game.total_players_hardcore} players ({mastery_percentage}%)", color=most_common_color)
-    embed.set_footer(text=f"{user} • Mastery achieved on {game_progress.highest_award_date_format}", icon_url=profile.profile.user_pic_unique)
+    
+    # Load emoji mappings
+    with open('emoji.json') as f:
+        emoji_mappings = json.load(f)
+    # Get the emoji ID based on console name, with a general emoji if no specific match is found
+    console_name = game.remap_console_name()
+    emoji_id = emoji_mappings.get(console_name.lower())
+    emoji = f"<:{console_name}:{emoji_id}>" if emoji_id else ":video_game:"
+
+    embed = discord.Embed(
+        description=(
+            f"**[{game.title}]({game.url})** "
+            f"{emoji}\n\n"
+            f"This is [{user}]({profile.profile.user_url})'s **{mastered_count}** mastery!\n\n"
+            f"Mastered in {mastery_time}\n\n"
+            f"Mastered by {highest_unlock} out of {game.total_players_hardcore} players "
+            f"({mastery_percentage}%)"
+        ),
+        color=most_common_color
+    )
+
+    embed.set_footer(
+        text=f"{user} • Mastery achieved on {game_progress.highest_award_date_format}",
+        icon_url=profile.profile.user_pic_unique
+    )
     embed.add_field(name="Achievements", value=f"{game.total_achievements}", inline=True)
     embed.add_field(name="Points", value=f"{game.total_points} ({game.calculate_total_true_ratio()})", inline=True)
     embed.set_author(name="Game Mastered", icon_url=game.image_icon)
     embed.set_image(url=DISCORD_IMAGE)
     embed.set_thumbnail(url=game.image_icon)
+
     return embed
