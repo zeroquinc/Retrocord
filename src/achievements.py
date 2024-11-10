@@ -152,7 +152,7 @@ def create_achievement_embed(game, user, achievement, profile, current, total):
     embed.add_field(name="Completion", value=f"{completion}/{game.total_achievements} (**{percentage:.2f}%**)", inline=True)
     embed.set_image(url=DISCORD_IMAGE)
     embed.set_thumbnail(url=achievement.badge_url)
-    embed.set_footer(text=f"{user} • Unlocked on {achievement.date_amsterdam}", icon_url=profile.profile.user_pic_unique)
+    embed.set_footer(text=f"{user} • {achievement.date_amsterdam}", icon_url=profile.profile.user_pic_unique)
     embed.set_author(name=f"{achievement.mode} Achievement Unlocked", icon_url=achievement.game_icon)
     return embed
 

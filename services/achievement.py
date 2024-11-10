@@ -67,7 +67,7 @@ class Achievement:
         str
             The formatted date.
         """
-        return datetime.strptime(date, "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.UTC).astimezone(pytz.timezone('Europe/Amsterdam')).strftime("%d/%m/%y at %H:%M:%S")
+        return datetime.strptime(date, "%Y-%m-%d %H:%M:%S").replace(tzinfo=pytz.UTC).astimezone(pytz.timezone('Europe/Amsterdam')).strftime("%d/%m/%y %H:%M:%S")
 
     def remap_console_name(self) -> str:
             """
