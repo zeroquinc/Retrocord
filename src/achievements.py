@@ -1,4 +1,5 @@
 import discord
+import json
 from datetime import datetime
 
 from services.api import UserProgressGameInfo, UserCompletionRecent, UserProfile, UserCompletionProgress, GameUnlocks
@@ -66,20 +67,19 @@ def process_game_mastery(game, user_completion, profile, mastery_embeds, mastery
         mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage)
         mastery_embeds.append((datetime.strptime(game_progress.highest_award_date, "%Y-%m-%dT%H:%M:%S%z"), mastery_embed))
 
-
 async def send_achievement_embeds(achievement_embeds, achievements_channel):
     achievement_embeds.sort(key=lambda x: x[0])
     if achievement_embeds:
         logger.info(f"Sending {len(achievement_embeds)} embeds to {achievements_channel}")
-        for i in range(0, len(achievement_embeds), 10):
-            await achievements_channel.send(embeds=[embed[1] for embed in achievement_embeds[i:i+10]])
+        for embed in achievement_embeds:
+            await achievements_channel.send(embed=embed[1])  # Send each embed individually
 
 async def send_mastery_embeds(mastery_embeds, mastery_channel):
     mastery_embeds.sort(key=lambda x: x[0])
     if mastery_embeds:
         logger.info(f"Sending {len(mastery_embeds)} mastery embeds to {mastery_channel}")
-        for i in range(0, len(mastery_embeds), 10):
-            await mastery_channel.send(embeds=[embed[1] for embed in mastery_embeds[i:i+10]])
+        for embed in mastery_embeds:
+            await mastery_channel.send(embed=embed[1])  # Send each embed individually
 
 def get_game_details(game_id, username, api_username, api_key):
     try:
@@ -120,10 +120,32 @@ def create_achievement_embed(game, user, achievement, profile, current, total):
     percentage = (completion / game.total_achievements) * 100
     unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
     most_common_color = get_discord_color(achievement.badge_url)
-    embed = discord.Embed(description=f"**[{achievement.game_title}]({achievement.game_url})** ({game.remap_console_name()}) \n\n{achievement.description}\n\nUnlocked by {game.achievements[achievement.title]['NumAwardedHardcore']} out of {game.total_players_hardcore} players ({unlock_percentage:.2f}%)", color=most_common_color)
-    
+
+    # Load emoji mappings
+    with open('emoji.json') as f:
+        emoji_mappings = json.load(f)
+    # Get the emoji ID based on console name, with a general emoji if no specific match is found
+    console_name = game.remap_console_name()
+    emoji_id = emoji_mappings.get(console_name.lower())
+    emoji = f"<:{console_name}:{emoji_id}>" if emoji_id else ":video_game:"
+
+    embed = discord.Embed(
+        description=(
+            f"**[{achievement.game_title}]({achievement.game_url})** "
+            f"{emoji}\n\n"
+            f"{achievement.description}\n\n"
+            f"Unlocked by {game.achievements[achievement.title]['NumAwardedHardcore']} out of "
+            f"{game.total_players_hardcore} players ({unlock_percentage:.2f}%)"
+        ),
+        color=most_common_color
+    )
+
     # Check if achievement type is 'Missable'
-    achievement_title = f"[{achievement.title}]({achievement.url}) (m)" if achievement.type == "missable" else f"[{achievement.title}]({achievement.url})"
+    achievement_title = (
+        f"[{achievement.title}]({achievement.url}) (m)"
+        if achievement.type == "missable"
+        else f"[{achievement.title}]({achievement.url})"
+    )
 
     embed.add_field(name="Achievement", value=achievement_title, inline=True)
     embed.add_field(name="Points", value=f"{achievement.points} ({achievement.retropoints_format})", inline=True)
