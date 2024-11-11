@@ -119,7 +119,7 @@ def create_achievement_embed(game, user, achievement, profile, current, total):
     completion = game.total_achievements_earned - total + current
     percentage = (completion / game.total_achievements) * 100
     unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
-    most_common_color = get_discord_color(achievement.badge_url)
+    most_common_color = get_discord_color(achievement.game_icon)
 
     # Load emoji mappings
     with open('emoji.json') as f:
