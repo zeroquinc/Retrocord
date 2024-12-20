@@ -5,7 +5,7 @@ from datetime import datetime
 from services.api import UserProgressGameInfo, UserCompletionRecent, UserProfile, UserCompletionProgress, GameUnlocks
 from utils.image import get_discord_color
 from utils.datetime import ordinal
-from config.config import api_key, api_username, DISCORD_IMAGE
+from config.config import api_key, api_username, DISCORD_IMAGE, ACHIEVEMENT_EMBED_STYLE
 
 from utils.custom_logger import logger
 
@@ -44,43 +44,6 @@ def get_user_profile_and_achievements(user_completion):
     game_details, game_achievements = get_achievements(user_completion)
     return profile, game_details, game_achievements
 
-def process_game_achievements(game, user_completion, achievements, profile, achievement_embeds):
-    achievements.sort(key=lambda x: datetime.strptime(x.date, "%Y-%m-%d %H:%M:%S"))
-    for i, achievement in enumerate(achievements):
-        embed = create_achievement_embed(game, user_completion.user, achievement, profile, i+1, len(achievements))
-        achievement_embeds.append((datetime.strptime(achievement.date, "%Y-%m-%d %H:%M:%S"), embed))
-
-def process_game_mastery(game, user_completion, profile, mastery_embeds, mastery_count):
-    user_progress = UserCompletionProgress(user_completion.user, api_username, api_key)
-    game_unlocks = GameUnlocks(api_username, api_key, game.id)
-    unlock_distribution = game_unlocks.get_distribution()
-    highest_unlock = unlock_distribution.get_highest_unlock()
-    progress = user_progress.get_progress()
-    mastered_count = ordinal(int(progress.count_mastered()) - mastery_count)
-    mastery_time = game.days_since_last_achievement()
-    mastery_percentage = round((highest_unlock / game.total_players_hardcore) * 100, 2)
-    if game_progress := next(
-        (result for result in progress.results if result.game_id == game.id),
-        None,
-    ):
-        logger.info(f"{user_completion.user} has mastered {game.title}! {game.total_achievements} achievements have been earned in {mastery_time}! {highest_unlock} out of {game.total_players_hardcore} players have mastered the game! ({mastery_percentage}%)")
-        mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage)
-        mastery_embeds.append((datetime.strptime(game_progress.highest_award_date, "%Y-%m-%dT%H:%M:%S%z"), mastery_embed))
-
-async def send_achievement_embeds(achievement_embeds, achievements_channel):
-    achievement_embeds.sort(key=lambda x: x[0])
-    if achievement_embeds:
-        logger.info(f"Sending {len(achievement_embeds)} embeds to {achievements_channel}")
-        for embed in achievement_embeds:
-            await achievements_channel.send(embed=embed[1])  # Send each embed individually
-
-async def send_mastery_embeds(mastery_embeds, mastery_channel):
-    mastery_embeds.sort(key=lambda x: x[0])
-    if mastery_embeds:
-        logger.info(f"Sending {len(mastery_embeds)} mastery embeds to {mastery_channel}")
-        for embed in mastery_embeds:
-            await mastery_channel.send(embed=embed[1])  # Send each embed individually
-
 def get_game_details(game_id, username, api_username, api_key):
     try:
         return UserProgressGameInfo(
@@ -115,7 +78,40 @@ def get_achievements(user_completion):
     except Exception as e:
         logger.error(f'Error getting achievements for user {user_completion.user}: {e}')
 
+def process_game_achievements(game, user_completion, achievements, profile, achievement_embeds):
+    achievements.sort(key=lambda x: datetime.strptime(x.date, "%Y-%m-%d %H:%M:%S"))
+    for i, achievement in enumerate(achievements):
+        embed = create_achievement_embed(game, user_completion.user, achievement, profile, i+1, len(achievements))
+        achievement_embeds.append((datetime.strptime(achievement.date, "%Y-%m-%d %H:%M:%S"), embed))
+
+def process_game_mastery(game, user_completion, profile, mastery_embeds, mastery_count):
+    user_progress = UserCompletionProgress(user_completion.user, api_username, api_key)
+    game_unlocks = GameUnlocks(api_username, api_key, game.id)
+    unlock_distribution = game_unlocks.get_distribution()
+    highest_unlock = unlock_distribution.get_highest_unlock()
+    progress = user_progress.get_progress()
+    mastered_count = ordinal(int(progress.count_mastered()) - mastery_count)
+    mastery_time = game.days_since_last_achievement()
+    mastery_percentage = round((highest_unlock / game.total_players_hardcore) * 100, 2)
+    if game_progress := next(
+        (result for result in progress.results if result.game_id == game.id),
+        None,
+    ):
+        logger.info(f"{user_completion.user} has mastered {game.title}! {game.total_achievements} achievements have been earned in {mastery_time}! {highest_unlock} out of {game.total_players_hardcore} players have mastered the game! ({mastery_percentage}%)")
+        mastery_embed = create_mastery_embed(game, user_completion.user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage)
+        mastery_embeds.append((datetime.strptime(game_progress.highest_award_date, "%Y-%m-%dT%H:%M:%S%z"), mastery_embed))
+        
+# Embed creation wrapper function
 def create_achievement_embed(game, user, achievement, profile, current, total):
+    if ACHIEVEMENT_EMBED_STYLE == 1:
+        return create_achievement_embed_v1(game, user, achievement, profile, current, total)
+    elif ACHIEVEMENT_EMBED_STYLE == 2:
+        return create_achievement_embed_v2(game, user, achievement, profile, current, total)
+    else:
+        raise ValueError("Invalid ACHIEVEMENT_EMBED configuration value")
+
+# First style of achievement embed
+def create_achievement_embed_v1(game, user, achievement, profile, current, total):
     completion = game.total_achievements_earned - total + current
     percentage = (completion / game.total_achievements) * 100
     unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
@@ -156,6 +152,48 @@ def create_achievement_embed(game, user, achievement, profile, current, total):
     embed.set_author(name=f"{achievement.mode} Achievement Unlocked", icon_url=achievement.game_icon)
     return embed
 
+# Second style of achievement embed
+def create_achievement_embed_v2(game, user, achievement, profile, current, total):
+    completion = game.total_achievements_earned - total + current
+    percentage = (completion / game.total_achievements) * 100
+    unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
+    most_common_color = get_discord_color(achievement.game_icon)
+
+    # Load emoji mappings
+    with open('emoji.json') as f:
+        emoji_mappings = json.load(f)
+    # Get the emoji ID based on console name, with a general emoji if no specific match is found
+    console_name = game.remap_console_name()
+    emoji_id = emoji_mappings.get(console_name.lower())
+    emoji = f"<:{console_name}:{emoji_id}>" if emoji_id else ":video_game:"
+    
+    # Check if achievement type is 'Missable'
+    achievement_title = (
+        f"{achievement.title} (m)"
+        if achievement.type == "missable"
+        else f"{achievement.title}"
+    )
+
+    embed = discord.Embed(
+        title=achievement_title,
+        description=(
+            f"{achievement.description}\n\n"
+            f"{achievement.mode}\n"
+            f"**[{achievement.game_title}]({achievement.game_url})** "
+            f"{emoji}\n\n"
+        ),
+        color=most_common_color
+    )
+
+    embed.add_field(name="Unlock Ratio", value=f"{int(unlock_percentage * 10) / 10:.1f}%", inline=True)
+    embed.add_field(name="Points", value=f"{achievement.points} ({achievement.retropoints_format})", inline=True)
+    embed.add_field(name="Progress", value=f"{completion}/{game.total_achievements} ({percentage:.2f}%)", inline=True)
+    embed.set_image(url=DISCORD_IMAGE)
+    embed.set_thumbnail(url=achievement.badge_url)
+    embed.set_footer(text=f"{user} • {achievement.date_amsterdam}", icon_url=profile.profile.user_pic_unique)
+    embed.set_author(name="Achievement unlocked", icon_url=achievement.game_icon)
+    return embed
+
 def create_mastery_embed(game, user, profile, game_progress, mastered_count, mastery_time, highest_unlock, mastery_percentage):
     most_common_color = get_discord_color(game.image_icon)
     
@@ -190,3 +228,18 @@ def create_mastery_embed(game, user, profile, game_progress, mastered_count, mas
     embed.set_thumbnail(url=game.image_icon)
 
     return embed
+    
+
+async def send_achievement_embeds(achievement_embeds, achievements_channel):
+    achievement_embeds.sort(key=lambda x: x[0])
+    if achievement_embeds:
+        logger.info(f"Sending {len(achievement_embeds)} embeds to {achievements_channel}")
+        for embed in achievement_embeds:
+            await achievements_channel.send(embed=embed[1])  # Send each embed individually
+
+async def send_mastery_embeds(mastery_embeds, mastery_channel):
+    mastery_embeds.sort(key=lambda x: x[0])
+    if mastery_embeds:
+        logger.info(f"Sending {len(mastery_embeds)} mastery embeds to {mastery_channel}")
+        for embed in mastery_embeds:
+            await mastery_channel.send(embed=embed[1])  # Send each embed individually
