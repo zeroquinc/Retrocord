@@ -32,6 +32,7 @@ DAILY_OVERVIEW_CHANNEL_ID = ""
 MASTERY_CHANNEL_ID = ""
 RETROACHIEVEMENTS_INTERVAL = 5
 PRESENCE_INTERVAL = 120
+ACHIEVEMENT_EMBED_STYLE = 2
 
 # The delay before starting the tasks, useful for debugging, otherwise it will start within the first 15th minute
 TASK_START_DELAY = {
