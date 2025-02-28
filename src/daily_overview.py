@@ -104,7 +104,7 @@ def create_embed(profile, daily_hardcore_points, daily_softcore_points, daily_re
         if max_achievement.mode == "Hardcore":
             embed.description += f"**{max_achievement.points}** Hardcore Points and **{max_achievement.retropoints_format}** Retro Points.\n\n"
         else:
-            embed.description += f"**{max_achievement.points}** Hardcore Points.\n\n"
+            embed.description += f"**{max_achievement.points}** Softcore Points.\n\n"
 
         if daily_hardcore_points != "0":
             embed.description += f"***{daily_hardcore_points}** Hardcore Points and **{daily_retropoints}** Retro Points have been earned in total today.*"
