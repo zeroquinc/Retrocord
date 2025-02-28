@@ -112,7 +112,11 @@ def create_achievement_embed(game, user, achievement, profile, current, total):
 
 # First style of achievement embed
 def create_achievement_embed_v1(game, user, achievement, profile, current, total):
-    completion = game.total_achievements_earned - total + current
+    if achievement.mode == "Hardcore":
+        completion = game.total_achievements_earned_hardcore - total + current
+    else:  # Assuming 'softcore' as the default else case
+        completion = game.total_achievements_earned_softcore - total + current
+
     percentage = (completion / game.total_achievements) * 100
     unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
     most_common_color = get_discord_color(achievement.game_icon)
@@ -154,7 +158,11 @@ def create_achievement_embed_v1(game, user, achievement, profile, current, total
 
 # Second style of achievement embed
 def create_achievement_embed_v2(game, user, achievement, profile, current, total):
-    completion = game.total_achievements_earned - total + current
+    if achievement.mode == "Hardcore":
+        completion = game.total_achievements_earned_hardcore - total + current
+    else:  # Assuming 'softcore' as the default else case
+        completion = game.total_achievements_earned_softcore - total + current
+
     percentage = (completion / game.total_achievements) * 100
     unlock_percentage = (game.achievements[achievement.title]['NumAwardedHardcore'] / game.total_players_hardcore) * 100 if game.total_players_hardcore else 0
     most_common_color = get_discord_color(achievement.game_icon)
